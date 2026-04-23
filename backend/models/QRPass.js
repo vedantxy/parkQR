@@ -1,9 +1,10 @@
 const mongoose = require('mongoose');
 
-const qrPassSchema = new mongoose.Schema({
+// QR Pass Schema Definition
+const qrSchema = new mongoose.Schema({
     visitorId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Visitor',
+        ref: 'Visitor', // Establishing relationship with Visitor model
         required: true
     },
     qrCode: {
@@ -19,7 +20,8 @@ const qrPassSchema = new mongoose.Schema({
         default: false
     }
 }, {
-    timestamps: true
+    timestamps: true // Automatically adds createdAt and updatedAt fields
 });
 
-module.exports = mongoose.model('QRPass', qrPassSchema);
+// Export the model as "QRPass"
+module.exports = mongoose.model('QRPass', qrSchema);
