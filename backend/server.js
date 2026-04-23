@@ -21,23 +21,14 @@ app.get('/', (req, res) => {
 // @desc    Create a new visitor
 app.post('/visitor', async (req, res) => {
     try {
-        const { name, phone, vehicle, flatNumber, isPriority, entryTime, gate } = req.body;
-
-        const newVisitor = new Visitor({
-            name,
-            phone,
-            vehicle,
-            flatNumber,
-            isPriority,
-            entryTime: entryTime || new Date(),
-            gate
-        });
-
-        const visitor = await newVisitor.save();
+        // Create a new visitor from the request body data
+        const visitor = await Visitor.create(req.body);
+        
+        // Return the created visitor object
         res.status(201).json(visitor);
     } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
+        // Return status 500 with the error message
+        res.status(500).json({ error: err.message });
     }
 });
 
