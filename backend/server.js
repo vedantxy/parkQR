@@ -13,6 +13,8 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
+app.use('/api/users', require('./routes/userRoutes'));
+
 app.get('/', (req, res) => {
     res.send('API Running...');
 });
