@@ -1,5 +1,11 @@
 # 🅿️ ParkQR — Smart QR-Based Visitor & Parking Management System
 
+
+
+### 🔗 Figma Link
+👉 **[View Full Figma Design](https://www.figma.com/proto/KxdacndljNmlOhHl1HTTVM/Untitled?page-id=392%3A2&node-id=398-1773&p=f&viewport=604%2C289%2C0.1&t=HXsAZWVVL4Ppeoch-1&scaling=min-zoom&content-scaling=fixed&starting-point-node-id=398%3A1773)**
+
+---
 <div align="center">
 
 ![ParkQR Banner](https://img.shields.io/badge/ParkQR-Smart%20Parking%20System-1a1a2e?style=for-the-badge)
