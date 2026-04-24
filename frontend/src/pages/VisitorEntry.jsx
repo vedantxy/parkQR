@@ -4,6 +4,7 @@ import QRModal from '../components/QRModal';
 
 const VisitorEntry = () => {
   const [qrCode, setQrCode] = useState(null);
+  const [expiresAt, setExpiresAt] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -12,21 +13,17 @@ const VisitorEntry = () => {
     setError('');
     
     try {
-      // Note: Make sure backend is running on 5000 and CORS is enabled
       const response = await fetch('http://localhost:5000/api/visitors', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // If you have auth implemented, add token here:
-          // 'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        setQrCode(data.qrCode); // This is the base64 image from backend
+        setQrCode(data.qrCode);
+        setExpiresAt(data.expiresAt);
       } else {
         setError(data.message || 'Failed to generate pass');
       }
@@ -38,33 +35,41 @@ const VisitorEntry = () => {
   };
 
   return (
-    <div className="container">
+    <div className="container" style={{ maxWidth: '600px', margin: '0 0' }}>
       <div className="card">
-        <h2>Visitor Entry</h2>
-        <p style={{ textAlign: 'center', color: '#94a3b8', marginBottom: '30px' }}>
-          Register a new visitor to generate a security pass.
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '8px' }}>Visitor Registration</h2>
+        <p style={{ color: 'var(--text-muted)', marginBottom: '32px', fontSize: '0.875rem' }}>
+          Assign access credentials and generate visual entry tokens.
         </p>
 
         {error && (
           <div style={{ 
-            padding: '10px', 
-            background: 'rgba(239, 68, 68, 0.1)', 
-            color: '#ef4444', 
+            padding: '12px', 
+            background: '#fef2f2', 
+            color: 'var(--error)', 
             borderRadius: '8px',
-            marginBottom: '20px',
-            fontSize: '0.9rem',
-            textAlign: 'center'
+            marginBottom: '24px',
+            fontSize: '0.875rem',
+            fontWeight: 600,
+            border: '1px solid #fee2e2'
           }}>
-            {error}
+            ⚠️ {error}
           </div>
         )}
 
         <VisitorForm onSubmit={handleVisitorSubmit} loading={loading} />
       </div>
 
-      <QRModal qrCode={qrCode} onClose={() => setQrCode(null)} />
+      <QRModal 
+        qrCode={qrCode} 
+        expiresAt={expiresAt} 
+        onClose={() => setQrCode(null)} 
+      />
     </div>
   );
+
+
+
 };
 
 export default VisitorEntry;

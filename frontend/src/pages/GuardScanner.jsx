@@ -33,60 +33,84 @@ const GuardScanner = () => {
   };
 
   return (
-    <div className="container">
+    <div className="container" style={{ maxWidth: '500px', margin: '0 0' }}>
       <div className="card">
-        <h2>Guard Control: QR Verification</h2>
-        <p style={{ textAlign: 'center', color: '#94a3b8', marginBottom: '20px' }}>
-          Paste the JSON data from the QR code to simulate a scan.
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '8px' }}>Security Surveillance</h2>
+        <p style={{ color: 'var(--text-muted)', marginBottom: '24px', fontSize: '0.875rem' }}>
+          Real-time entry verification terminal.
         </p>
 
-        <div className="form-group">
-          <label>QR Payload (Simulated Scan)</label>
+        <div className="form-group" style={{ background: '#f8fafc', padding: '20px', borderRadius: '16px', border: '2px solid #e2e8f0' }}>
+          <label className="form-label" style={{ marginBottom: '12px', display: 'block' }}>Simulated Optical Input</label>
           <textarea
             value={scannedData}
             onChange={(e) => setScannedData(e.target.value)}
-            placeholder='{"vId": "...", "flat": "...", "exp": ...}'
-            style={{ 
-                width: '100%', 
-                height: '100px', 
-                background: 'rgba(0,0,0,0.2)', 
-                border: '1px solid rgba(255,255,255,0.1)',
-                color: '#fff',
-                padding: '10px',
-                borderRadius: '8px',
-                fontFamily: 'monospace',
-                fontSize: '0.8rem'
-            }}
+            className="form-input"
+            placeholder='Ready for QR payload...'
+            style={{ height: '120px', background: 'white', fontFamily: 'monospace' }}
           />
+          <div style={{ marginTop: '12px', height: '4px', background: 'var(--primary)', borderRadius: '2px', opacity: 0.3 }}></div>
         </div>
 
         <button 
             onClick={handleVerify} 
+            className="btn btn-primary"
             disabled={loading || !scannedData}
-            style={{ width: '100%', padding: '12px', background: '#6366f1' }}
+            style={{ width: '100%', marginTop: '24px' }}
         >
-          {loading ? 'Verifying...' : 'Verify Entry'}
+          {loading ? 'Analyzing Token...' : 'Verify Entry Credentials'}
         </button>
 
         {error && (
-          <div style={{ marginTop: '20px', padding: '15px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', borderRadius: '8px', textAlign: 'center' }}>
-            <strong>Access Denied:</strong> {error}
+          <div style={{ 
+            marginTop: '24px', 
+            padding: '20px', 
+            background: '#fef2f2', 
+            color: 'var(--error)', 
+            borderRadius: '12px', 
+            border: '1px solid #fee2e2',
+            textAlign: 'center'
+          }}>
+            <h4 style={{ margin: '0 0 4px 0' }}>🚫 ACCESS DENIED</h4>
+            <div style={{ fontSize: '0.875rem' }}>Reason: {error}</div>
           </div>
         )}
 
         {result && (
-          <div style={{ marginTop: '20px', padding: '15px', background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', borderRadius: '8px', textAlign: 'center' }}>
-            <strong>✅ {result.message}</strong>
-            <div style={{ marginTop: '10px', fontSize: '0.9rem', color: '#fff' }}>
-              Visitor: {result.visitor.name} <br/>
-              Flat: {result.visitor.flat} <br/>
-              Entry Time: {new Date(result.visitor.entryTime).toLocaleTimeString()}
+          <div style={{ 
+            marginTop: '24px', 
+            padding: '24px', 
+            background: '#ecfdf5', 
+            color: '#065f46', 
+            borderRadius: '12px', 
+            border: '1px solid #d1fae5'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+               <div style={{ width: 12, height: 12, background: 'var(--success)', borderRadius: '50%' }}></div>
+               <h4 style={{ margin: 0, fontWeight: 800 }}>✅ VERIFIED: ENTRY ALLOWED</h4>
+            </div>
+            
+            <div style={{ fontSize: '0.875rem', color: '#064e3b' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', borderBottom: '1px solid rgba(6, 95, 70, 0.1)', paddingBottom: '8px' }}>
+                <span>Visitor</span>
+                <strong>{result.visitor.name}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', borderBottom: '1px solid rgba(6, 95, 70, 0.1)', paddingBottom: '8px' }}>
+                <span>Authorized Unit</span>
+                <strong>{result.visitor.flat}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>Log Timestamp</span>
+                <span>{new Date(result.visitor.entryTime).toLocaleTimeString()}</span>
+              </div>
             </div>
           </div>
         )}
       </div>
     </div>
   );
+
+
 };
 
 export default GuardScanner;
