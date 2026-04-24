@@ -42,56 +42,63 @@ const VisitorForm = ({ onSubmit, loading }) => {
 
   return (
     <form className="ai-form" onSubmit={handleSubmit}>
-      <div className="form-field">
-        <label>Full Name</label>
-        <input 
-          type="text" 
-          name="name" 
-          className="form-input"
-          placeholder="e.g. Rahul Sharma"
-          value={formData.name} 
-          onChange={handleChange} 
-        />
-        {errors.name && <span className="error-msg">{errors.name}</span>}
+      <div className="form-grid" style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+        gap: '20px'
+      }}>
+        <div className="form-field">
+          <label>Full Name</label>
+          <input 
+            type="text" 
+            name="name" 
+            className="form-input"
+            placeholder="e.g. Rahul Sharma"
+            value={formData.name} 
+            onChange={handleChange} 
+          />
+          {errors.name && <span className="error-msg">{errors.name}</span>}
+        </div>
+
+        <div className="form-field">
+          <label>Phone Number</label>
+          <input 
+            type="text" 
+            name="phone" 
+            className="form-input"
+            placeholder="10-digit mobile"
+            value={formData.phone} 
+            onChange={handleChange} 
+          />
+          {errors.phone && <span className="error-msg">{errors.phone}</span>}
+        </div>
+
+        <div className="form-field">
+          <label>Vehicle Number</label>
+          <input 
+            type="text" 
+            name="vehicle" 
+            className="form-input"
+            placeholder="MH 12 AB 1234"
+            value={formData.vehicle} 
+            onChange={handleChange} 
+          />
+        </div>
+
+        <div className="form-field">
+          <label>Flat Number</label>
+          <input 
+            type="text" 
+            name="flatNumber" 
+            className="form-input"
+            placeholder="e.g. A-402"
+            value={formData.flatNumber} 
+            onChange={handleChange} 
+          />
+          {errors.flatNumber && <span className="error-msg">{errors.flatNumber}</span>}
+        </div>
       </div>
 
-      <div className="form-field">
-        <label>Phone Number</label>
-        <input 
-          type="text" 
-          name="phone" 
-          className="form-input"
-          placeholder="10-digit mobile"
-          value={formData.phone} 
-          onChange={handleChange} 
-        />
-        {errors.phone && <span className="error-msg">{errors.phone}</span>}
-      </div>
-
-      <div className="form-field">
-        <label>Vehicle Number</label>
-        <input 
-          type="text" 
-          name="vehicle" 
-          className="form-input"
-          placeholder="MH 12 AB 1234"
-          value={formData.vehicle} 
-          onChange={handleChange} 
-        />
-      </div>
-
-      <div className="form-field">
-        <label>Flat Number</label>
-        <input 
-          type="text" 
-          name="flatNumber" 
-          className="form-input"
-          placeholder="e.g. A-402"
-          value={formData.flatNumber} 
-          onChange={handleChange} 
-        />
-        {errors.flatNumber && <span className="error-msg">{errors.flatNumber}</span>}
-      </div>
 
       <div className="form-field">
         <label className="checkbox-group">

@@ -25,18 +25,27 @@ const Dashboard = () => {
 
       <div className="parking-container">
         <h3>Live Parking Map</h3>
-        <div className="glass parking-grid">
+        <div 
+          className="glass parking-grid" 
+          style={{ 
+            overflowX: 'auto', 
+            display: 'grid', 
+            padding: '15px' 
+          }}
+        >
           {Array.from({ length: 40 }).map((_, i) => (
             <div 
               key={i} 
-              className={`parking-slot ${i % 3 === 0 ? 'slot-occupied' : i % 7 === 0 ? 'slot-reserved' : 'slot-available'}`}
+              className={`char-slot parking-slot ${i % 3 === 0 ? 'slot-occupied' : i % 7 === 0 ? 'slot-reserved' : 'slot-available'}`}
               title={`Slot ${i + 1}`}
+              style={{ minWidth: '40px', minHeight: '40px' }}
             >
               {String(i + 1).padStart(2, '0')}
             </div>
           ))}
         </div>
       </div>
+
     </div>
   );
 };
