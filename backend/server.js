@@ -14,24 +14,11 @@ app.use(express.json());
 
 // Routes
 app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/qr', require('./routes/qrRoutes'));
+app.use('/api/visitors', require('./routes/visitorRoutes'));
 
 app.get('/', (req, res) => {
-    res.send('API Running...');
-});
-
-// @route   POST /visitor
-// @desc    Create a new visitor
-app.post('/visitor', async (req, res) => {
-    try {
-        // Create a new visitor from the request body data
-        const visitor = await Visitor.create(req.body);
-        
-        // Return the created visitor object
-        res.status(201).json(visitor);
-    } catch (err) {
-        // Return status 500 with the error message
-        res.status(500).json({ error: err.message });
-    }
+    res.send('Smart Parking API is Running...');
 });
 
 const PORT = process.env.PORT || 5000;
