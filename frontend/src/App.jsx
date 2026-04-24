@@ -1,24 +1,37 @@
-import React from 'react';
+import React, { useState } from 'react';
 import VisitorEntry from './pages/VisitorEntry';
+import GuardScanner from './pages/GuardScanner';
 import './index.css';
 
 function App() {
+  const [mode, setMode] = useState('visitor'); // 'visitor' or 'guard'
+
   return (
     <div className="App">
-      <header style={{ 
-        padding: '20px', 
-        textAlign: 'center', 
-        fontSize: '1.2rem', 
-        fontWeight: 'bold',
-        color: '#6366f1',
-        borderBottom: '1px solid rgba(255,255,255,0.05)'
-      }}>
-        Smart Parking & Visitor Management System
+      <header>
+        <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#6366f1' }}>
+          Smart Parking System
+        </div>
+        <div className="nav-toggle">
+          <button 
+            className={mode === 'visitor' ? 'active' : ''} 
+            onClick={() => setMode('visitor')}
+          >
+            Visitor Mode
+          </button>
+          <button 
+            className={mode === 'guard' ? 'active' : ''} 
+            onClick={() => setMode('guard')}
+          >
+            Guard Mode
+          </button>
+        </div>
       </header>
       
       <main>
-        <VisitorEntry />
+        {mode === 'visitor' ? <VisitorEntry /> : <GuardScanner />}
       </main>
+
 
       <footer style={{ 
         textAlign: 'center', 

@@ -13,7 +13,23 @@ const QRModal = ({ qrCode, onClose }) => {
         
         <div className="qr-container">
           <img src={qrCode} alt="Visitor QR Code" className="qr-image" />
+          <div style={{ marginTop: '10px' }}>
+            <p style={{ color: '#94a3b8', fontSize: '0.75rem', marginBottom: '5px' }}>
+              [DEV ONLY] Scannable Payload:
+            </p>
+            <div style={{ 
+                background: 'rgba(0,0,0,0.3)', 
+                padding: '8px', 
+                borderRadius: '5px', 
+                fontSize: '0.65rem', 
+                wordBreak: 'break-all',
+                color: '#6366f1'
+            }}>
+              {atob(qrCode.split(',')[1])}
+            </div>
+          </div>
         </div>
+
 
         <button 
           onClick={onClose}

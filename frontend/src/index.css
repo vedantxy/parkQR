@@ -142,6 +142,37 @@ button:disabled {
   margin-top: 5px;
 }
 
+header {
+  padding: 20px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.nav-toggle {
+  display: flex;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.nav-toggle button {
+  padding: 8px 20px;
+  background: transparent;
+  width: auto;
+  font-size: 0.85rem;
+  border-radius: 8px;
+  color: var(--text-muted);
+}
+
+.nav-toggle button.active {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -151,3 +182,4 @@ button:disabled {
   from { transform: translateY(20px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
+
