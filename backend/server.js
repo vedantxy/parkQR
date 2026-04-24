@@ -6,7 +6,7 @@ const Visitor = require('./models/Visitor');
 const app = express();
 
 // Connect to Database
-connectDB();
+// connectDB();
 
 // Middleware
 app.use(cors());

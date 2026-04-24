@@ -1,62 +1,41 @@
-const Visitor = require('../models/Visitor');
-const QRPass = require('../models/QRPass');
 const QRCode = require('qrcode');
 const crypto = require('crypto');
 
-/**
- * @desc    Add a new visitor and generate a secure QR Pass
- * @route   POST /api/visitors
- * @access  Private (Admin/Guard/Resident)
- */
-const createVisitor = async (req, res) => {
+// Mock data store
+let visitors = [];
+
+exports.createVisitor = async (req, res) => {
   try {
     const { name, phone, vehicle, flatNumber, isPriority } = req.body;
 
-    // 1. Basic Validation
     if (!name || !phone || !flatNumber) {
       return res.status(400).json({ message: 'Please provide all required fields' });
     }
 
-    // 2. Create the Visitor
-    const visitor = await Visitor.create({
+    const visitor = {
+      _id: 'mock_id_' + Date.now(),
       name,
       phone,
       vehicle,
       flatNumber,
       isPriority,
-      status: 'coming'
-    });
+      status: 'coming',
+      createdAt: new Date()
+    };
 
-    // 3. Security Optimization: Tamper-proof QR Data
-    // Instead of JSON in QR, use a unique short token or the QRPass ID.
-    // This prevents users from manually creating fake QR data.
+    visitors.push(visitor);
+
     const secureToken = crypto.randomBytes(20).toString('hex');
-
-    // 4. Create the QRPass Record
-    const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 Min Expiry
-
-    const qrPass = await QRPass.create({
-      visitorId: visitor._id,
-      qrCode: secureToken, // Store only the token/ID, NOT the heavy base64
-      expiresAt,
-      isUsed: false
-    });
-
-    // 5. Generate QR Image for response only (Do not store base64 in DB)
-    // The QR data now only points to our internal record.
-    const qrImageBase64 = await QRCode.toDataURL(qrPass.qrCode);
+    const qrCode = await QRCode.toDataURL(secureToken);
 
     res.status(201).json({
       success: true,
+      message: 'Visitor registered successfully',
       visitor,
-      qrCode: qrImageBase64, // Returned to frontend for display
-      qrPassId: qrPass._id,
-      expiresAt
+      qrCode
     });
-
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    console.error('Visitor Controller Error:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
-
-module.exports = { createVisitor };
