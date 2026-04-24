@@ -1,45 +1,38 @@
 import React from 'react';
 
-const QRModal = ({ qrCode, onClose }) => {
+const QRModal = ({ qrCode, onClose, expiresAt }) => {
   if (!qrCode) return null;
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <h2>Visitor Entry Pass</h2>
-        <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
-          Please show this QR code at the entry gate.
-        </p>
+      <div className="glass modal-content qr-modal" onClick={(e) => e.stopPropagation()}>
+        <h2>Security Pass</h2>
+        <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '10px' }}>
+          Authorized Entry for Resident Verification
+        </div>
         
-        <div className="qr-container">
-          <img src={qrCode} alt="Visitor QR Code" className="qr-image" />
-          <div style={{ marginTop: '10px' }}>
-            <p style={{ color: '#94a3b8', fontSize: '0.75rem', marginBottom: '5px' }}>
-              [DEV ONLY] Scannable Payload:
-            </p>
-            <div style={{ 
-                background: 'rgba(0,0,0,0.3)', 
-                padding: '8px', 
-                borderRadius: '5px', 
-                fontSize: '0.65rem', 
-                wordBreak: 'break-all',
-                color: '#6366f1'
-            }}>
-              {atob(qrCode.split(',')[1])}
-            </div>
+        <div className="qr-frame">
+          <img src={qrCode} alt="Visitor QR Code" className="qr-image-full" />
+        </div>
+
+        <div className="glass" style={{ padding: '12px', marginBottom: '20px', background: 'rgba(99, 102, 241, 0.05)' }}>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '4px' }}>EXPIRES AT</div>
+          <div style={{ fontWeight: '600', color: 'var(--primary)' }}>
+            {expiresAt ? new Date(expiresAt).toLocaleTimeString() : '--:--'}
           </div>
         </div>
 
-
         <button 
+          className="btn-primary"
           onClick={onClose}
-          style={{ background: 'rgba(255,255,255,0.1)', marginTop: '10px' }}
+          style={{ width: '100%' }}
         >
-          Close Pass
+          Confirm & Close
         </button>
       </div>
     </div>
   );
 };
+
 
 export default QRModal;

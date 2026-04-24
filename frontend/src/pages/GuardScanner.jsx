@@ -33,60 +33,77 @@ const GuardScanner = () => {
   };
 
   return (
-    <div className="container">
-      <div className="card">
-        <h2>Guard Control: QR Verification</h2>
-        <p style={{ textAlign: 'center', color: '#94a3b8', marginBottom: '20px' }}>
-          Paste the JSON data from the QR code to simulate a scan.
+    <div className="container" style={{ margin: '0' }}>
+      <div className="glass card">
+        <h2>QR Surveillance</h2>
+        <p style={{ textAlign: 'center', color: 'var(--text-muted)', marginBottom: '20px' }}>
+          Simulated scanning interface for entry verification.
         </p>
 
-        <div className="form-group">
-          <label>QR Payload (Simulated Scan)</label>
+        <div className="form-field">
+          <label>Encrypted QR Payload</label>
           <textarea
             value={scannedData}
             onChange={(e) => setScannedData(e.target.value)}
-            placeholder='{"vId": "...", "flat": "...", "exp": ...}'
-            style={{ 
-                width: '100%', 
-                height: '100px', 
-                background: 'rgba(0,0,0,0.2)', 
-                border: '1px solid rgba(255,255,255,0.1)',
-                color: '#fff',
-                padding: '10px',
-                borderRadius: '8px',
-                fontFamily: 'monospace',
-                fontSize: '0.8rem'
-            }}
+            className="form-input"
+            placeholder='Paste scannable data here...'
+            style={{ height: '100px', fontFamily: 'monospace', fontSize: '0.75rem' }}
           />
         </div>
 
         <button 
             onClick={handleVerify} 
+            className="btn-primary"
             disabled={loading || !scannedData}
-            style={{ width: '100%', padding: '12px', background: '#6366f1' }}
+            style={{ marginTop: '10px' }}
         >
-          {loading ? 'Verifying...' : 'Verify Entry'}
+          {loading ? 'Decrypting...' : 'Verify Access'}
         </button>
 
         {error && (
-          <div style={{ marginTop: '20px', padding: '15px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', borderRadius: '8px', textAlign: 'center' }}>
-            <strong>Access Denied:</strong> {error}
+          <div className="glass" style={{ 
+            marginTop: '20px', 
+            padding: '15px', 
+            background: 'rgba(244, 63, 94, 0.1)', 
+            color: 'var(--error)', 
+            borderRadius: '12px', 
+            textAlign: 'center',
+            border: '1px solid rgba(244, 63, 94, 0.2)'
+          }}>
+            <strong>DENIED:</strong> {error}
           </div>
         )}
 
         {result && (
-          <div style={{ marginTop: '20px', padding: '15px', background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', borderRadius: '8px', textAlign: 'center' }}>
-            <strong>✅ {result.message}</strong>
-            <div style={{ marginTop: '10px', fontSize: '0.9rem', color: '#fff' }}>
-              Visitor: {result.visitor.name} <br/>
-              Flat: {result.visitor.flat} <br/>
-              Entry Time: {new Date(result.visitor.entryTime).toLocaleTimeString()}
+          <div className="glass" style={{ 
+            marginTop: '20px', 
+            padding: '20px', 
+            background: 'rgba(16, 185, 129, 0.1)', 
+            color: 'var(--success)', 
+            borderRadius: '12px', 
+            border: '1px solid rgba(16, 185, 129, 0.2)'
+          }}>
+            <h3 style={{ margin: '0 0 10px 0', textAlign: 'center' }}>ACCESS GRANTED</h3>
+            <div style={{ color: 'var(--text-main)', fontSize: '0.9rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span style={{ color: 'var(--text-muted)' }}>Visitor:</span>
+                <span>{result.visitor.name}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span style={{ color: 'var(--text-muted)' }}>Destination:</span>
+                <span>Flat {result.visitor.flat}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: 'var(--text-muted)' }}>Entry Logged:</span>
+                <span>{new Date(result.visitor.entryTime).toLocaleTimeString()}</span>
+              </div>
             </div>
           </div>
         )}
       </div>
     </div>
   );
+
 };
 
 export default GuardScanner;

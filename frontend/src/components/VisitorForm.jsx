@@ -41,12 +41,13 @@ const VisitorForm = ({ onSubmit, loading }) => {
   };
 
   return (
-    <form className="visitor-form" onSubmit={handleSubmit}>
-      <div className="form-group">
-        <label>Visitor Name</label>
+    <form className="ai-form" onSubmit={handleSubmit}>
+      <div className="form-field">
+        <label>Full Name</label>
         <input 
           type="text" 
           name="name" 
+          className="form-input"
           placeholder="e.g. Rahul Sharma"
           value={formData.name} 
           onChange={handleChange} 
@@ -54,11 +55,12 @@ const VisitorForm = ({ onSubmit, loading }) => {
         {errors.name && <span className="error-msg">{errors.name}</span>}
       </div>
 
-      <div className="form-group">
+      <div className="form-field">
         <label>Phone Number</label>
         <input 
           type="text" 
           name="phone" 
+          className="form-input"
           placeholder="10-digit mobile"
           value={formData.phone} 
           onChange={handleChange} 
@@ -66,22 +68,24 @@ const VisitorForm = ({ onSubmit, loading }) => {
         {errors.phone && <span className="error-msg">{errors.phone}</span>}
       </div>
 
-      <div className="form-group">
-        <label>Vehicle Number (Optional)</label>
+      <div className="form-field">
+        <label>Vehicle Number</label>
         <input 
           type="text" 
           name="vehicle" 
-          placeholder="e.g. MH 12 AB 1234"
+          className="form-input"
+          placeholder="MH 12 AB 1234"
           value={formData.vehicle} 
           onChange={handleChange} 
         />
       </div>
 
-      <div className="form-group">
+      <div className="form-field">
         <label>Flat Number</label>
         <input 
           type="text" 
           name="flatNumber" 
+          className="form-input"
           placeholder="e.g. A-402"
           value={formData.flatNumber} 
           onChange={handleChange} 
@@ -89,7 +93,7 @@ const VisitorForm = ({ onSubmit, loading }) => {
         {errors.flatNumber && <span className="error-msg">{errors.flatNumber}</span>}
       </div>
 
-      <div className="form-group">
+      <div className="form-field">
         <label className="checkbox-group">
           <input 
             type="checkbox" 
@@ -97,15 +101,16 @@ const VisitorForm = ({ onSubmit, loading }) => {
             checked={formData.isPriority} 
             onChange={handleChange} 
           />
-          Priority Visitor (Elderly/Delivery)
+          Priority Access (Fast Track)
         </label>
       </div>
 
-      <button type="submit" disabled={loading}>
-        {loading ? 'Generating Pass...' : 'Generate Entry Pass'}
+      <button type="submit" className="btn-primary" disabled={loading}>
+        {loading ? 'Processing...' : 'Generate AI Pass'}
       </button>
     </form>
   );
+
 };
 
 export default VisitorForm;

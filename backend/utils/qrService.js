@@ -8,38 +8,38 @@ const QRPass = require('../models/QRPass');
 class QRService {
     /**
      * Generates and stores a Base64 QR code from a structured visitor payload.
-     * @param {Object} visitor - The visitor document from the database.
-     * @param {Number} expiryMinutes - Expiry time in minutes (default 30).
-     * @returns {Promise<Object>} Object containing qrCode (Base64) and expiresAt.
+     * @param {Object} visitor - The visitor document.
+     * @param {Number} expiryMinutes - Expiry time.
+     * @param {Boolean} isMock - Whether to bypass DB storage.
+     * @returns {Promise<Object>} 
      */
-    static async generateAndStoreQR(visitor, expiryMinutes = 30) {
+    static async generateAndStoreQR(visitor, expiryMinutes = 30, isMock = false) {
         try {
             const expiresAt = new Date(Date.now() + (expiryMinutes * 60 * 1000));
 
-            // 1. Define structured payload (MANDATORY DESIGN RULE)
+            // 1. Define structured payload
             const payload = {
-                vId: visitor._id.toString(), // Unique visitor ID
-                flat: visitor.flatNumber,    // Destination
-                iat: Date.now(),             // Issued At (timestamp)
-                exp: expiresAt.getTime()     // Expiry timestamp
+                vId: visitor._id.toString(),
+                flat: visitor.flatNumber,
+                iat: Date.now(),
+                exp: expiresAt.getTime()
             };
 
-            // 2. Convert payload to QR image (Base64)
-            // JSON structure improves verification & prevents arbitrary data misuse
+            // 2. Convert to QR Base64
             const qrString = JSON.stringify(payload);
-            const qrCode = await QRCode.toDataURL(qrString, {
-                errorCorrectionLevel: 'H',
-                margin: 2
-            });
+            const qrCode = await QRCode.toDataURL(qrString);
 
-            // 3. Persist QR Pass in Database (Audit + Verification Layer)
-            const qrPass = await QRPass.create({
-                visitorId: visitor._id,
-                qrCode,
-                expiresAt
-            });
+            // 3. Persist only if NOT mock
+            if (!isMock) {
+                await QRPass.create({
+                    visitorId: visitor._id,
+                    qrCode,
+                    expiresAt
+                });
+            }
 
-            return { qrCode, expiresAt: qrPass.expiresAt };
+            return { qrCode, expiresAt };
+
         } catch (err) {
             console.error('QR Generation/Storage Error:', err);
             throw new Error('Failed to generate secure QR pass');

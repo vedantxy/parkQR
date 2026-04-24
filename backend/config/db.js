@@ -11,9 +11,10 @@ const connectDB = async () => {
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     console.error(`DB Error: ${error.message}`);
-    // Exit process with failure code
-    process.exit(1);
+    console.warn('Backend will continue in Mock Mode without Database persistence.');
+    // process.exit(1);
   }
+
 };
 
 module.exports = connectDB;

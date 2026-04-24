@@ -1,16 +1,41 @@
-const QRService = require('../utils/qrService');
 const Visitor = require('../models/Visitor');
 const QRPass = require('../models/QRPass');
+const mongoose = require('mongoose');
+const QRService = require('../utils/qrService');
+
+
+// Fallback Mock Storage (For when MongoDB is not running)
+let mockVisitors = [];
 
 exports.createVisitor = async (req, res) => {
   try {
-    const { name, phone, vehicle, flatNumber, isPriority, purpose } = req.body;
+    const { name, phone, vehicle, flatNumber, isPriority } = req.body;
 
     if (!name || !phone || !flatNumber) {
       return res.status(400).json({ message: 'Please provide all required fields' });
     }
 
+    // Check if MongoDB is connected
+    if (mongoose.connection.readyState !== 1) {
+      console.warn('MongoDB not connected. Falling back to Mock Data for demo.');
+      
+      const mockId = 'm_' + Date.now();
+      const visitor = { _id: mockId, name, phone, vehicle, flatNumber, isPriority };
+      mockVisitors.push(visitor);
+
+      const { qrCode, expiresAt } = await QRService.generateAndStoreQR(visitor, 30, true); // Added flag for mock
+      
+      return res.status(201).json({
+        success: true,
+        visitorId: mockId,
+        qrCode,
+        expiresAt,
+        isMock: true
+      });
+    }
+
     // 1. Persist Visitor Data in MongoDB
+
     const visitor = await Visitor.create({
       name,
       phone,
@@ -56,8 +81,29 @@ exports.verifyVisitor = async (req, res) => {
 
     const { vId } = validation.data;
 
+    // Check if MongoDB is connected
+    if (mongoose.connection.readyState !== 1) {
+      console.warn('MongoDB not connected. Verifying via Mock Data.');
+      const visitor = mockVisitors.find(v => v._id === vId);
+      
+      if (!visitor) {
+        return res.status(404).json({ success: false, message: 'Visitor record not found (Mock)' });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: 'Access Granted! (Demo Mode)',
+        visitor: {
+          name: visitor.name,
+          flat: visitor.flatNumber,
+          entryTime: new Date()
+        }
+      });
+    }
+
     // 2. Database verification (Audit Trail + Status Check)
     const qrPass = await QRPass.findOne({ visitorId: vId }).populate('visitorId');
+
     
     if (!qrPass) {
       return res.status(404).json({ success: false, message: 'QR Pass not found in records' });
