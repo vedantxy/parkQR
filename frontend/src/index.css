@@ -11,8 +11,14 @@
   
   --bg-main: #F8FAFC;
   --bg-card: #FFFFFF;
+  --text: #0F172A;
   --text-main: #0F172A;
   --text-muted: #64748B;
+  
+  --semantic-green: #10B981;
+  --semantic-amber: #F59E0B;
+  --semantic-red: #EF4444;
+  --ai-teal: #0D9488;
   
   --border-color: #E2E8F0;
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);

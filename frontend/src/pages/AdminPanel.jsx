@@ -1,4 +1,5 @@
 import React from 'react';
+import ParkingGrid from '../components/ParkingGrid';
 
 const AdminPanel = () => {
   const logs = [
@@ -9,7 +10,7 @@ const AdminPanel = () => {
   ];
 
   return (
-    <div className="admin-panel">
+    <div className="admin-panel animate-in">
       <div className="dashboard-grid">
         <div className="glass stat-card">
           <div className="stat-label">Total Monthly Visitors</div>
@@ -21,6 +22,10 @@ const AdminPanel = () => {
           <div className="stat-value">6:00 PM</div>
           <div style={{ color: 'var(--primary)', fontSize: '0.8rem' }}>Average 45 entries/hr</div>
         </div>
+      </div>
+
+      <div className="glass" style={{ marginTop: '30px', padding: '30px' }}>
+         <ParkingGrid />
       </div>
 
       <div className="glass" style={{ marginTop: '30px', padding: '30px', overflowX: 'auto' }}>
