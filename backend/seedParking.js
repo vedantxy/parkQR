@@ -3,13 +3,13 @@ const ParkingSlot = require('./models/ParkingSlot');
 require('dotenv').config();
 
 const slots = [
-    { slotId: 'A1', slotType: 'Guest' },
-    { slotId: 'A2', slotType: 'Guest' },
-    { slotId: 'A3', slotType: 'Guest' },
-    { slotId: 'B1', slotType: 'VIP' },
-    { slotId: 'B2', slotType: 'VIP' },
-    { slotId: 'C1', slotType: 'Reserved' },
-    { slotId: 'C2', slotType: 'Reserved' },
+    { slotId: 'A1', slotType: 'Guest', timeLimit: 60 },
+    { slotId: 'A2', slotType: 'Guest', timeLimit: 60 },
+    { slotId: 'A3', slotType: 'Guest', timeLimit: 60 },
+    { slotId: 'B1', slotType: 'VIP', timeLimit: 120 },
+    { slotId: 'B2', slotType: 'VIP', timeLimit: 120 },
+    { slotId: 'C1', slotType: 'Reserved', timeLimit: 480 },
+    { slotId: 'C2', slotType: 'Reserved', timeLimit: 480 },
 ];
 
 const seedSlots = async () => {

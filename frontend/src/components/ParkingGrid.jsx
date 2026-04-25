@@ -30,72 +30,111 @@ const ParkingGrid = () => {
     return (
         <div style={{ padding: '20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                <h3 style={{ margin: 0 }}>Smart Allocation Grid</h3>
+                <h3 style={{ margin: 0 }}>Live Parking Monitor</h3>
                 <div style={{ display: 'flex', gap: '16px', fontSize: '0.8rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <div style={{ width: 12, height: 12, background: 'var(--success)', borderRadius: '3px' }}></div> Free
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <div style={{ width: 12, height: 12, background: 'var(--error)', borderRadius: '3px' }}></div> Occupied
+                        <div style={{ width: 12, height: 12, background: 'var(--warning)', borderRadius: '3px' }}></div> Near Limit
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <div style={{ width: 12, height: 12, background: 'var(--error)', borderRadius: '3px' }}></div> Overstay
                     </div>
                 </div>
             </div>
 
             <div style={{ 
                 display: 'grid', 
-                gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', 
+                gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', 
                 gap: '20px' 
             }}>
-                {slots.map((slot) => (
-                    <div key={slot._id} className="animate-in" style={{
-                        aspectRatio: '0.7',
-                        background: slot.isOccupied ? 'rgba(239, 68, 68, 0.05)' : 'rgba(16, 185, 129, 0.05)',
-                        border: `2px solid ${slot.isOccupied ? 'var(--error)' : 'var(--success)'}`,
-                        borderRadius: '12px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        position: 'relative',
-                        transition: 'all 0.3s ease',
-                        boxShadow: slot.isOccupied ? 'none' : '0 4px 12px rgba(16, 185, 129, 0.1)'
-                    }}>
-                        <div style={{ 
-                            fontSize: '1.25rem', 
-                            fontWeight: 800, 
-                            color: slot.isOccupied ? 'var(--error)' : 'var(--success)' 
-                        }}>
-                            {slot.slotId}
-                        </div>
-                        <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginTop: '4px' }}>
-                            {slot.slotType}
-                        </div>
-                        
-                        {slot.isOccupied && (
-                            <div style={{ 
-                                marginTop: '12px', 
-                                padding: '4px 8px', 
-                                background: 'var(--error)', 
-                                color: 'white', 
-                                fontSize: '0.6rem', 
-                                borderRadius: '4px',
-                                fontWeight: 700
-                            }}>
-                                {slot.vehicle}
-                            </div>
-                        )}
+                {slots.map((slot) => {
+                    const usagePercent = slot.isOccupied ? Math.min((slot.duration / slot.timeLimit) * 100, 100) : 0;
+                    const isNearLimit = usagePercent > 80 && usagePercent <= 100;
+                    const isOverstayed = slot.isOverstayed;
+                    
+                    let statusColor = 'var(--success)';
+                    if (isOverstayed) statusColor = 'var(--error)';
+                    else if (isNearLimit) statusColor = 'var(--warning)';
+                    else if (slot.isOccupied) statusColor = 'var(--primary)';
 
-                        <div style={{
-                            position: 'absolute',
-                            top: '8px',
-                            right: '8px',
-                            width: '8px',
-                            height: '8px',
-                            borderRadius: '50%',
-                            background: slot.isOccupied ? 'var(--error)' : 'var(--success)'
-                        }}></div>
-                    </div>
-                ))}
+                    return (
+                        <div key={slot._id} className="animate-in" style={{
+                            aspectRatio: '0.8',
+                            background: slot.isOccupied ? 'white' : 'rgba(16, 185, 129, 0.05)',
+                            border: `2px solid ${statusColor}`,
+                            borderRadius: '16px',
+                            padding: '12px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            position: 'relative',
+                            transition: 'all 0.3s ease',
+                            boxShadow: slot.isOccupied ? '0 10px 15px -3px rgba(0, 0, 0, 0.1)' : 'none'
+                        }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                                <div style={{ fontSize: '1.2rem', fontWeight: 900, color: statusColor }}>
+                                    {slot.slotId}
+                                </div>
+                                <div style={{ 
+                                    padding: '2px 6px', 
+                                    background: `${statusColor}20`, 
+                                    color: statusColor, 
+                                    fontSize: '0.6rem', 
+                                    borderRadius: '4px',
+                                    fontWeight: 700
+                                }}>
+                                    {slot.slotType}
+                                </div>
+                            </div>
+                            
+                            {slot.isOccupied ? (
+                                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', marginTop: '10px' }}>
+                                    <div style={{ fontWeight: 700, fontSize: '0.8rem', marginBottom: '8px' }}>{slot.vehicle}</div>
+                                    
+                                    <div style={{ marginBottom: '4px', fontSize: '0.65rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between' }}>
+                                        <span>Stay: {slot.duration}m</span>
+                                        <span>{Math.max(slot.timeLimit - slot.duration, 0)}m left</span>
+                                    </div>
+                                    
+                                    <div style={{ height: '6px', width: '100%', background: '#eee', borderRadius: '3px', overflow: 'hidden' }}>
+                                        <div style={{ 
+                                            height: '100%', 
+                                            width: `${usagePercent}%`, 
+                                            background: statusColor,
+                                            transition: 'width 0.5s ease'
+                                        }}></div>
+                                    </div>
+
+                                    {isOverstayed && (
+                                        <div style={{ 
+                                            marginTop: '8px', 
+                                            fontSize: '0.6rem', 
+                                            color: 'var(--error)', 
+                                            fontWeight: 800,
+                                            textAlign: 'center',
+                                            animation: 'pulse 2s infinite'
+                                        }}>
+                                            ⚠️ OVERSTAYED
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--success)', opacity: 0.5 }}>
+                                    <span style={{ fontSize: '0.7rem', fontWeight: 600 }}>AVAILABLE</span>
+                                </div>
+                            )}
+
+                            <style>{`
+                                @keyframes pulse {
+                                    0% { opacity: 1; }
+                                    50% { opacity: 0.5; }
+                                    100% { opacity: 1; }
+                                }
+                            `}</style>
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );
