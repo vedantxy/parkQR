@@ -1,71 +1,90 @@
-#  ParkQR — Smart QR-Based Parking & Visitor Management
+# 🅿️ ParkSmart: Enterprise-Grade AI Parking & Visitor Management
 
-> Real-time, paperless parking and visitor management powered by dynamic QR codes, automated billing, and live analytics.
+ParkSmart is a production-ready, SaaS-level solution for modern residential societies, corporate campuses, and smart cities. It leverages real-time automation, AI-driven parking allocation, and advanced analytics to streamline facility management.
 
-[![React](https://img.shields.io/badge/React-18+-61DAFB?style=flat-square&logo=react&logoColor=black)](https://reactjs.org)
-[![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org)
-[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=flat-square&logo=mongodb&logoColor=white)](https://mongodb.com)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
+![Project Status](https://img.shields.io/badge/Status-Production--Ready-success)
+![Technology](https://img.shields.io/badge/Stack-MERN%20+%20Socket.IO-blue)
 
----
+## 🌟 Key Features
 
-### 🔗 Figma Link
-👉 **[View Full Figma Design](https://www.figma.com/proto/KxdacndljNmlOhHl1HTTVM/Untitled?page-id=392%3A2&node-id=398-1773&p=f&viewport=604%2C289%2C0.1&t=HXsAZWVVL4Ppeoch-1&scaling=min-zoom&content-scaling=fixed&starting-point-node-id=398%3A1773)**
+### 📡 Real-Time Security Engine
+*   **Instant Notifications**: Powered by Socket.IO for real-time entry/exit alerts.
+*   **Overstay Detection**: Automated background monitoring to identify vehicles exceeding their time limits.
+*   **Dynamic Toasts**: Interactive real-time alerts for security personnel.
 
----
+### 📊 Intelligent Analytics Center
+*   **Data Aggregation**: MongoDB-powered pipelines for daily visitor trends.
+*   **Visual KPIs**: Responsive charts (Recharts) showing occupancy rates, peak hours, and security alerts.
+*   **Audit Logging**: Full history of visitor movements and parking usage.
 
-## 🚨 The Problem
+### 🛂 Smart Visitor Entry (QR-Based)
+*   **Instant Pass Generation**: QR-based entry tokens for contactless check-ins.
+*   **Priority (VIP) System**: Tiered slot allocation for VIP guests.
+*   **Multi-Gate Support**: Unified control for facilities with multiple entrance/exit points.
 
-Manual parking systems are slow, error-prone, and costly. Key pain points:
+### 🏗️ Fail-Safe Architecture
+*   **Intelligent Mock Mode**: The system automatically switches to an in-memory data store if the database is offline, ensuring 100% uptime for testing.
+*   **Clean MVC Structure**: Scalable backend designed for enterprise growth.
 
-- **Long wait times** — 8–15 min average entry/exit per vehicle
-- **No real-time visibility** — drivers waste fuel searching for open slots
-- **Paper-based logs** — easy to forge, impossible to audit
-- **Revenue leakage** — unbilled overstays and ghost entries
-- **Zero analytics** — admins fly blind with no usage data
+## 🛠️ Tech Stack
 
-> A typical 500-slot facility loses ₹3–8 lakh annually from manual mismanagement alone.
+- **Frontend**: React.js, Recharts, Lucide Icons, Framer Motion
+- **Backend**: Node.js, Express.js, Socket.IO
+- **Database**: MongoDB (Mongoose)
+- **Styling**: Modern CSS3 (Glassmorphism & SaaS Aesthetics)
 
----
+## 🚀 Getting Started
 
-## 💡 The Solution
+### 1. Prerequisites
+*   Node.js (v16+)
+*   MongoDB (Optional, system has a built-in Mock Mode)
 
-ParkQR replaces paper tickets and manual logbooks with **dynamic, encrypted, time-bound QR codes** — one per vehicle or visitor. Every scan-in/scan-out is logged instantly, slots update in real time, and billing is fully automated.
+### 2. Installation
+```bash
+# Clone the repository
+git clone <repo-url>
 
+# Install Backend Dependencies
+cd backend
+npm install
+
+# Install Frontend Dependencies
+cd ../frontend
+npm install
 ```
-Arrive → QR Generated → Scan Entry → Slot Auto-Assigned
-   ↓
-Live Dashboard Updates → Overstay Alerts
-   ↓
-Scan Exit → Bill Calculated → Payment → QR Invalidated
+
+### 3. Running the System
+```bash
+# Start Backend (Port 5000)
+cd backend
+node server.js
+
+# Start Frontend (Port 5173)
+cd frontend
+npm run dev
 ```
 
-No app install required. Works on any mobile browser via a Progressive Web App.
+### 4. Seed Data (Optional)
+To populate the parking slots:
+```bash
+node backend/seedParking.js
+```
 
----
+## 📂 Project Structure
 
-## 📄 Pages
+```text
+├── backend/
+│   ├── controllers/    # Business Logic (Analytics, Visitors, etc.)
+│   ├── models/         # Database Schemas
+│   ├── routes/         # API Endpoints
+│   ├── utils/          # Real-time & Mock Data Helpers
+│   └── server.js       # Socket.IO & HTTP Server
+├── frontend/
+│   ├── src/
+│   │   ├── components/ # Reusable SaaS components (Charts, Alerts)
+│   │   ├── pages/      # Command Center, Scanner, Registration
+│   │   └── utils/      # Socket.IO client config
+```
 
-| Page | Description |
-|---|---|
-| **Login** | Role-based auth for Admin, Gate Operator, and Visitor |
-| **Dashboard** | Live occupancy stats, revenue summary, gate throughput |
-| **Slot Map** | Real-time visual grid — color-coded by availability and zone |
-| **Visitor Management** | Pre-register visitors, issue digital passes, manage blacklist/whitelist |
-| **Billing & Invoices** | Auto-calculated charges, grace periods, downloadable invoices |
-| **Analytics & Reports** | Heatmaps, peak-hour trends, revenue charts, CSV/PDF export |
-| **Gate Operator Interface** | Offline-capable PWA for scan-in/scan-out at entry/exit gates |
-| **Settings / Profile** | Facility config, pricing rules, user management |
-
----
-
-## 📞 Contact
-
-**Vedant Patel** — Lead Developer  
-📧 vedantpatelxy12@gmail.com · [GitHub Discussions](#)
-
----
-
-<div align="center">
-  Built with ❤️ to solve real parking chaos &nbsp;|&nbsp; MIT License
-</div>
+## 📜 License
+This project is licensed under the MIT License.

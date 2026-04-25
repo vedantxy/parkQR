@@ -27,6 +27,18 @@ const parkingSlotSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Visitor',
         default: null
+    },
+    duration: {
+        type: Number,
+        default: 0 // Duration in minutes
+    },
+    isOverstayed: {
+        type: Boolean,
+        default: false
+    },
+    timeLimit: {
+        type: Number,
+        default: 60 // Configurable limit in minutes
     }
 }, {
     timestamps: true

@@ -3,16 +3,18 @@ import Dashboard from './pages/Dashboard';
 import VisitorEntry from './pages/VisitorEntry';
 import GuardScanner from './pages/GuardScanner';
 import AdminPanel from './pages/AdminPanel';
+import NotificationBell from './components/NotificationBell';
 import './index.css';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [showNotificationPanel, setShowNotificationPanel] = useState(false);
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: '📊' },
     { id: 'visitors', label: 'Visitors', icon: '👤' },
     { id: 'scanner', label: 'Scanner', icon: '🛂' },
-    { id: 'logs', label: 'Audit Logs', icon: '📑' },
+    { id: 'logs', label: 'Admin Command', icon: '📑' },
   ];
 
   return (
@@ -49,8 +51,12 @@ function App() {
           <h1 style={{ fontSize: '1.5rem', fontWeight: 800 }}>
             {navItems.find(i => i.id === activeTab).label}
           </h1>
-          <div className="card" style={{ padding: '8px 16px', fontSize: '0.875rem', fontWeight: 600 }}>
-            Terminal ID: GATE-01
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <NotificationBell onClick={() => setActiveTab('logs')} />
+            <div className="card" style={{ padding: '8px 16px', fontSize: '0.875rem', fontWeight: 600 }}>
+                Terminal ID: GATE-01
+            </div>
           </div>
         </header>
 
