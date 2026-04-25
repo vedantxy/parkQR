@@ -168,7 +168,15 @@ async function handleActualScan(req, res, visitor, qrPass, gateName) {
     let statusUpdate = {};
     let assignedSlotData = null;
 
+    // Security: Prevent Entry Replay
+    if (visitor.status === "inside" && !qrPass.isUsed) {
+        // This is likely an exit attempt
+    } else if (visitor.status === "exited" || qrPass.isUsed) {
+        return res.status(403).json({ success: false, message: 'QR INVALID OR EXPIRED' });
+    }
+
     if (visitor.status === "coming") {
+      // --- SECURE ENTRY ---
       const slot = await assignSlot(visitor);
       if (!slot) return res.status(503).json({ success: false, message: 'PARKING FULL' });
 
@@ -177,29 +185,32 @@ async function handleActualScan(req, res, visitor, qrPass, gateName) {
         assignedSlot: slot._id, scannedBy: req.body.scannedBy || 'System'
       };
       assignedSlotData = slot;
-      message = `ENTRY SUCCESS: Park at Slot ${slot.slotId}`;
+      message = `ENTRY GRANTED: Slot ${slot.slotId}`;
+      // Note: QR remains valid for Exit
     } 
     else if (visitor.status === "inside") {
+      // --- SECURE EXIT ---
       await freeSlot(visitor.assignedSlot);
       statusUpdate = { status: "exited", exitTime: new Date(), assignedSlot: null };
+      
       const durationMins = Math.round((statusUpdate.exitTime - visitor.entryTime) / (1000 * 60));
-      message = `EXIT SUCCESS: Slot freed. Stay: ${durationMins} mins`;
-      qrPass.isUsed = true;
+      message = `EXIT GRANTED: Stay Duration: ${durationMins} mins`;
+      
+      qrPass.isUsed = true; // QR is now dead
       await qrPass.save();
     } 
-    else {
-      return res.status(403).json({ success: false, message: 'ACCESS DENIED' });
-    }
 
     Object.assign(visitor, statusUpdate);
     await visitor.save();
 
-    // Sockets
+    // Sockets & Notifications
     const io = req.app.get('socketio');
-    const notif = await Notification.create({
+    const notifData = {
         message: `${visitor.name} (${visitor.vehicle}) ${visitor.status === 'inside' ? 'Entered' : 'Exited'} via ${visitor.gate}`,
-        type: visitor.status === 'inside' ? 'ENTRY' : 'EXIT', userId: 'admin'
-    });
+        type: visitor.status === 'inside' ? 'ENTRY' : 'EXIT', 
+        userId: 'admin'
+    };
+    const notif = await Notification.create(notifData);
 
     if (io) {
         io.emit(visitor.status === 'inside' ? 'visitor-entered' : 'visitor-exited', {
@@ -212,7 +223,7 @@ async function handleActualScan(req, res, visitor, qrPass, gateName) {
       success: true, message,
       data: {
         name: visitor.name, flat: visitor.flatNumber, status: visitor.status,
-        slotId: assignedSlotData ? assignedSlotData.slotId : (visitor.assignedSlot ? 'Assigned' : 'N/A'),
+        slotId: assignedSlotData ? assignedSlotData.slotId : 'Assigned',
         entryTime: visitor.entryTime, exitTime: visitor.exitTime
       }
     });
