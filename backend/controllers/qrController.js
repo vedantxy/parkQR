@@ -1,6 +1,6 @@
-const QRCode = require('qrcode');
 const QRPass = require('../models/QRPass');
 const Visitor = require('../models/Visitor');
+const QRService = require('../utils/qrService');
 
 /**
  * @desc    Generate a QR Code for a visitor and save to DB
@@ -14,38 +14,24 @@ const generateVisitorQR = async (req, res) => {
     // 1. Check if visitor exists
     const visitor = await Visitor.findById(visitorId);
     if (!visitor) {
-      return res.status(404).json({ message: 'Visitor not found' });
+      return res.status(404).json({ success: false, message: 'Visitor not found' });
     }
 
-    // 2. Generate unique data for QR (e.g., visitor ID + secret hash)
-    // For simplicity, we use visitor ID. In production, use a signed token.
-    const qrData = `visitor:${visitorId}:${Date.now()}`;
-
-    // 3. Generate QR as Data URI (Base64)
-    const qrImage = await QRCode.toDataURL(qrData);
-
-    // 4. Create and Save QRPass record
-    const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + 24); // Expiry in 24 hours
-
-    const qrPass = await QRPass.create({
-      visitorId,
-      qrCode: qrImage, // Storing the base64 string
-      expiresAt,
-      isUsed: false
-    });
+    // 2. Generate and Store using Service (Centralized Logic)
+    const { qrCode, expiresAt, token } = await QRService.generateAndStoreQR(visitor, 1440); // 24 hours
 
     res.status(201).json({
+      success: true,
       message: 'QR Pass generated successfully',
       qrPass: {
-        _id: qrPass._id,
-        qrCode: qrPass.qrCode, // Frontend can display this directly in <img> tag
-        expiresAt: qrPass.expiresAt
+        qrCode,
+        expiresAt,
+        token // Just in case frontend needs it
       }
     });
 
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ success: false, error: err.message });
   }
 };
 

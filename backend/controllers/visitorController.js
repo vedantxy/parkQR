@@ -15,23 +15,9 @@ exports.createVisitor = async (req, res) => {
       return res.status(400).json({ message: 'Please provide all required fields' });
     }
 
-    // Check if MongoDB is connected
+    // Require MongoDB for production-ready code
     if (mongoose.connection.readyState !== 1) {
-      console.warn('MongoDB not connected. Falling back to Mock Data for demo.');
-      
-      const mockId = 'm_' + Date.now();
-      const visitor = { _id: mockId, name, phone, vehicle, flatNumber, isPriority };
-      mockVisitors.push(visitor);
-
-      const { qrCode, expiresAt } = await QRService.generateAndStoreQR(visitor, 30, true); // Added flag for mock
-      
-      return res.status(201).json({
-        success: true,
-        visitorId: mockId,
-        qrCode,
-        expiresAt,
-        isMock: true
-      });
+      return res.status(503).json({ success: false, message: 'Database connecting... please retry' });
     }
 
     // 1. Persist Visitor Data in MongoDB
@@ -73,52 +59,39 @@ exports.verifyVisitor = async (req, res) => {
       return res.status(400).json({ success: false, message: 'No QR data provided' });
     }
 
-    // 1. Static validation (Format + Expiry)
+    // 1. Static validation (Format check)
     const validation = QRService.validateFormat(scannedData);
     if (!validation.valid) {
       return res.status(400).json({ success: false, message: validation.message });
     }
 
-    const { vId } = validation.data;
+    // 2. Database verification (Auth/Lookup by token)
+    // We use the token from scannedData directly
+    const qrPass = await QRPass.findOne({ token: scannedData }).populate('visitorId');
 
-    // Check if MongoDB is connected
-    if (mongoose.connection.readyState !== 1) {
-      console.warn('MongoDB not connected. Verifying via Mock Data.');
-      const visitor = mockVisitors.find(v => v._id === vId);
-      
-      if (!visitor) {
-        return res.status(404).json({ success: false, message: 'Visitor record not found (Mock)' });
-      }
-
-      return res.status(200).json({
-        success: true,
-        message: 'Access Granted! (Demo Mode)',
-        visitor: {
-          name: visitor.name,
-          flat: visitor.flatNumber,
-          entryTime: new Date()
-        }
-      });
-    }
-
-    // 2. Database verification (Audit Trail + Status Check)
-    const qrPass = await QRPass.findOne({ visitorId: vId }).populate('visitorId');
-
-    
     if (!qrPass) {
-      return res.status(404).json({ success: false, message: 'QR Pass not found in records' });
+      return res.status(404).json({ success: false, message: 'Invalid or forged QR Code' });
     }
 
-    // 3. Preventing Replay Attacks / Re-use
+    // 3. Check for Expiry
+    if (new Date() > qrPass.expiresAt) {
+      return res.status(410).json({ success: false, message: 'QR Code has expired' });
+    }
+
+    // 4. Preventing Replay Attacks / Re-use
     if (qrPass.isUsed) {
-      return res.status(400).json({ success: false, message: 'QR Code has already been used' });
+      return res.status(409).json({ success: false, message: 'QR Code already used' });
     }
 
-    // 4. Update status in both models
+    // 5. Atomic Update status in both models
     qrPass.isUsed = true;
     await qrPass.save();
 
     const visitor = qrPass.visitorId;
+    if (!visitor) {
+      return res.status(404).json({ success: false, message: 'Visitor record linked to QR no longer exists' });
+    }
+
     visitor.status = 'inside';
     visitor.entryTime = new Date();
     await visitor.save();
@@ -129,13 +102,14 @@ exports.verifyVisitor = async (req, res) => {
       visitor: {
         name: visitor.name,
         flat: visitor.flatNumber,
-        entryTime: visitor.entryTime
+        entryTime: visitor.entryTime,
+        vehicle: visitor.vehicle
       }
     });
 
   } catch (error) {
     console.error('Verification Error:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
 

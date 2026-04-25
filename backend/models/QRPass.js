@@ -11,6 +11,11 @@ const qrSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    token: {
+        type: String,
+        required: true,
+        unique: true
+    },
     expiresAt: {
         type: Date,
         required: true
@@ -20,8 +25,10 @@ const qrSchema = new mongoose.Schema({
         default: false
     }
 }, {
-    timestamps: true // Automatically adds createdAt and updatedAt fields
+    timestamps: true
 });
 
-// Export the model as "QRPass"
+// Index for fast token lookups
+qrSchema.index({ token: 1 });
+
 module.exports = mongoose.model('QRPass', qrSchema);
