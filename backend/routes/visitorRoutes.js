@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createVisitor, verifyVisitor } = require('../controllers/visitorController');
+const { createVisitor, scanQR } = require('../controllers/visitorController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
 // @route   POST /api/visitors
@@ -8,10 +8,10 @@ const { protect, authorize } = require('../middleware/authMiddleware');
 // @access  Public (for dev) or Private
 router.post('/', createVisitor);
 
-// @route   POST /api/visitors/verify
-// @desc    Verify a visitor QR code
+// @route   POST /api/visitors/scan-qr
+// @desc    Unified Entry/Exit Scan API
 // @access  Private (Guard only)
-router.post('/verify', verifyVisitor);
+router.post('/scan-qr', scanQR);
 
 
 module.exports = router;

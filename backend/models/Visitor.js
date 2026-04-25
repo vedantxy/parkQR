@@ -35,6 +35,14 @@ const visitorSchema = new mongoose.Schema({
     },
     gate: {
         type: String
+    },
+    assignedSlot: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'ParkingSlot',
+        default: null
+    },
+    scannedBy: {
+        type: String
     }
 }, {
     timestamps: true // Automatically adds createdAt and updatedAt fields

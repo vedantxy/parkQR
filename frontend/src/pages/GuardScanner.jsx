@@ -10,8 +10,10 @@ const GuardScanner = () => {
   const scannerRef = useRef(null);
 
   useEffect(() => {
-    // Only initialize scanner if it hasn't been initialized or if we are in scanning state
-    if (!scannerRef.current && isScanning) {
+    // Only initialize scanner if the container exists and we are in scanning state
+    const qrReaderDiv = document.getElementById("qr-reader");
+    
+    if (isScanning && !loading && qrReaderDiv && !scannerRef.current) {
       const scanner = new Html5QrcodeScanner(
         "qr-reader", 
         { fps: 10, qrbox: { width: 250, height: 250 } },
@@ -31,7 +33,7 @@ const GuardScanner = () => {
         scannerRef.current = null;
       }
     };
-  }, [isScanning]);
+  }, [isScanning, loading]);
 
   const onScanSuccess = async (decodedText) => {
     try {
@@ -45,27 +47,29 @@ const GuardScanner = () => {
       setLoading(true);
       setError('');
 
-      // 2. Send token to backend for verification
-      const response = await fetch('http://localhost:5000/api/visitors/verify', {
+      // 2. Send token to backend for unified scan
+      const response = await fetch('http://localhost:5000/api/visitors/scan-qr', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scannedData: decodedText }),
+        body: JSON.stringify({ 
+          qrData: decodedText,
+          gateName: "Main Entrance", // Optional tracking
+          scannedBy: "GUARD_001"    // Optional tracking
+        }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
         setResult(data);
-        // Play success sound or vibrate if possible
         if (navigator.vibrate) navigator.vibrate(200);
       } else {
-        setError(data.message || 'Verification Failed');
+        setError(data.message || 'Scan Processing Failed');
         if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-        // Allow re-scanning after error
         setIsScanning(true);
       }
     } catch (err) {
-      setError('Connection to backend failed.');
+      setError('Connection to security server lost.');
       setIsScanning(true);
     } finally {
       setLoading(false);
@@ -73,8 +77,6 @@ const GuardScanner = () => {
   };
 
   const onScanError = (errorMessage) => {
-    // We don't want to show every scan attempt error (like "No QR code found")
-    // as it happens 10 times per second.
     // console.log(errorMessage);
   };
 
@@ -86,107 +88,128 @@ const GuardScanner = () => {
 
   return (
     <div className="container" style={{ maxWidth: '600px', margin: '0 auto', padding: '20px' }}>
-      <div className="card glass">
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '8px', color: 'var(--text)' }}>
-          Gate Entry Terminal
-        </h2>
+      <div className="card glass animate-in">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+             <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0, color: 'var(--text)' }}>
+               Smart Scan Terminal
+             </h2>
+             <div style={{ padding: '4px 12px', background: 'rgba(30, 64, 175, 0.1)', color: 'var(--primary)', borderRadius: '99px', fontSize: '0.7rem', fontWeight: 700 }}>
+                ONLINE
+             </div>
+        </div>
+        
         <p style={{ color: 'var(--text-muted)', marginBottom: '24px', fontSize: '0.9rem' }}>
-          Authorized security personnel only. Scan visitor pass for instant verification.
+          Unified Entry & Exit verification system. Place QR code clearly in the scanner.
         </p>
 
         {isScanning && !loading && (
           <div id="qr-reader" style={{ 
             width: '100%', 
-            borderRadius: '16px', 
+            borderRadius: '20px', 
             overflow: 'hidden', 
-            border: '2px dashed var(--primary)',
-            background: 'rgba(255,255,255,0.05)'
+            border: '2px solid rgba(255,255,255,0.1)',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
           }}></div>
         )}
 
         {loading && (
-          <div style={{ textAlign: 'center', padding: '40px' }}>
-            <div className="spinner" style={{ margin: '0 auto 16px' }}></div>
-            <p style={{ fontWeight: 600 }}>Authenticating Token...</p>
+          <div style={{ textAlign: 'center', padding: '60px' }}>
+            <div className="spinner" style={{ margin: '0 auto 20px' }}></div>
+            <p style={{ fontWeight: 600, letterSpacing: '1px' }}>PROCESSING LIFECYCLE...</p>
           </div>
         )}
 
         {error && !loading && (
-          <div style={{ 
+          <div className="animate-in" style={{ 
             marginTop: '20px', 
-            padding: '24px', 
-            background: 'rgba(239, 68, 68, 0.1)', 
+            padding: '30px', 
+            background: 'rgba(239, 68, 68, 0.05)', 
             color: '#ef4444', 
-            borderRadius: '16px', 
-            border: '1px solid rgba(239, 68, 68, 0.2)',
+            borderRadius: '20px', 
+            border: '1px solid rgba(239, 68, 68, 0.1)',
             textAlign: 'center'
           }}>
-            <div style={{ fontSize: '3rem', marginBottom: '12px' }}>⚠️</div>
-            <h3 style={{ margin: '0 0 8px 0', textTransform: 'uppercase' }}>Access Denied</h3>
-            <p style={{ fontWeight: 500 }}>{error}</p>
+            <div style={{ fontSize: '4rem', marginBottom: '16px' }}>⚠️</div>
+            <h3 style={{ margin: '0 0 10px 0', fontWeight: 800 }}>SECURITY BLOCK</h3>
+            <p style={{ fontWeight: 500, opacity: 0.8 }}>{error}</p>
             <button 
               onClick={handleReset}
               className="btn"
-              style={{ marginTop: '16px', background: '#ef4444', color: 'white' }}
+              style={{ marginTop: '24px', background: '#ef4444', color: 'white', padding: '12px 30px' }}
             >
-              Try Again
+              Retry Scan
             </button>
           </div>
         )}
 
         {result && !loading && (
-          <div style={{ 
-            marginTop: '20px', 
-            animation: 'slideUp 0.4s ease-out'
-          }}>
+          <div className="animate-in" style={{ marginTop: '20px' }}>
             <div style={{ 
-              padding: '24px', 
-              background: 'rgba(16, 185, 129, 0.1)', 
-              borderRadius: '20px', 
-              border: '1px solid rgba(16, 185, 129, 0.2)'
+              padding: '30px', 
+              background: result.data.status === 'inside' ? 'rgba(16, 185, 129, 0.05)' : 'rgba(30, 64, 175, 0.05)', 
+              borderRadius: '24px', 
+              border: `1px solid ${result.data.status === 'inside' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(30, 64, 175, 0.1)'}`
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '24px' }}>
                 <div style={{ 
-                  width: '48px', 
-                  height: '48px', 
-                  background: 'var(--success)', 
-                  borderRadius: '50%',
+                  width: '64px', 
+                  height: '64px', 
+                  background: result.data.status === 'inside' ? 'var(--success)' : 'var(--primary)', 
+                  borderRadius: '18px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '1.5rem',
+                  fontSize: '2rem',
                   color: 'white',
-                  boxShadow: '0 0 20px rgba(16, 185, 129, 0.4)'
-                }}>✓</div>
+                  boxShadow: result.data.status === 'inside' ? '0 10px 20px rgba(16, 185, 129, 0.2)' : '0 10px 20px rgba(30, 64, 175, 0.2)'
+                }}>
+                  {result.data.status === 'inside' ? '▼' : '▲'}
+                </div>
                 <div>
-                  <h3 style={{ margin: 0, color: 'var(--success)', fontWeight: 800 }}>VERIFIED ENTRY</h3>
-                  <p style={{ margin: 0, fontSize: '0.8rem', color: 'rgba(16, 185, 129, 0.7)' }}>
-                    {new Date().toLocaleString()}
+                  <h3 style={{ margin: 0, color: result.data.status === 'inside' ? 'var(--success)' : 'var(--primary)', fontWeight: 800 }}>
+                    {result.data.status === 'inside' ? 'ENTRY AUTHORIZED' : 'EXIT AUTHORIZED'}
+                  </h3>
+                  <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                    {result.message}
                   </p>
                 </div>
               </div>
 
-              <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '12px', padding: '16px' }}>
+              <div style={{ background: 'white', borderRadius: '16px', padding: '20px', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
                 <div className="info-row">
-                  <span className="label">Visitor Name</span>
-                  <span className="value">{result.visitor.name}</span>
+                  <span className="label">Visitor</span>
+                  <span className="value">{result.data.name}</span>
                 </div>
                 <div className="info-row">
-                  <span className="label">Authorized Flat</span>
-                  <span className="value">Unit {result.visitor.flat}</span>
+                  <span className="label">Unit No.</span>
+                  <span className="value">{result.data.flat}</span>
                 </div>
                 <div className="info-row">
-                  <span className="label">Vehicle No</span>
-                  <span className="value">{result.visitor.vehicle || 'None'}</span>
+                  <span className="label">Current Status</span>
+                  <span className={`status-badge ${result.data.status === 'inside' ? 'badge-active' : 'badge-used'}`} style={{ padding: '2px 8px' }}>
+                    {result.data.status.toUpperCase()}
+                  </span>
                 </div>
+                {result.data.entryTime && (
+                  <div className="info-row">
+                    <span className="label">Entry At</span>
+                    <span className="value">{new Date(result.data.entryTime).toLocaleTimeString()}</span>
+                  </div>
+                )}
+                {result.data.exitTime && (
+                  <div className="info-row">
+                    <span className="label">Exit At</span>
+                    <span className="value">{new Date(result.data.exitTime).toLocaleTimeString()}</span>
+                  </div>
+                )}
               </div>
 
               <button 
                 onClick={handleReset}
                 className="btn btn-primary"
-                style={{ width: '100%', marginTop: '20px' }}
+                style={{ width: '100%', marginTop: '24px', padding: '14px' }}
               >
-                Scan Next Visitor
+                Ready for Next Scan
               </button>
             </div>
           </div>

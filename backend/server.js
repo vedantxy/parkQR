@@ -15,8 +15,9 @@ app.use(express.json());
 
 // Routes
 app.use('/api/users', require('./routes/userRoutes'));
-app.use('/api/qr', require('./routes/qrRoutes'));
 app.use('/api/visitors', require('./routes/visitorRoutes'));
+app.use('/api/parking', require('./routes/parkingRoutes'));
+app.use('/api/qr', require('./routes/qrRoutes'));
 
 app.get('/', (req, res) => {
     res.send('Smart Parking API is Running...');
