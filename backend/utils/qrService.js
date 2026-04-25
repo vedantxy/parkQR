@@ -1,65 +1,57 @@
 const QRCode = require('qrcode');
 const QRPass = require('../models/QRPass');
+const crypto = require('crypto');
 
 /**
  * QR Service for Smart Visitor Management System
- * Handles generation of structured, secure QR codes and database persistence.
+ * Handles generation of secure, token-based QR codes.
  */
 class QRService {
     /**
-     * Generates and stores a Base64 QR code from a structured visitor payload.
+     * Generates and stores a unique token-based QR code.
      * @param {Object} visitor - The visitor document.
      * @param {Number} expiryMinutes - Expiry time.
-     * @param {Boolean} isMock - Whether to bypass DB storage.
      * @returns {Promise<Object>} 
      */
-    static async generateAndStoreQR(visitor, expiryMinutes = 30, isMock = false) {
+    static async generateAndStoreQR(visitor, expiryMinutes = 60) {
         try {
             const expiresAt = new Date(Date.now() + (expiryMinutes * 60 * 1000));
+            
+            // 1. Generate a secure random token
+            const token = crypto.randomBytes(32).toString('hex');
 
-            // 1. Define structured payload
-            const payload = {
-                vId: visitor._id.toString(),
-                flat: visitor.flatNumber,
-                iat: Date.now(),
-                exp: expiresAt.getTime()
-            };
+            // 2. Convert raw token to QR Base64
+            // We only put the token in the QR to prevent data leakage and tampering
+            const qrCode = await QRCode.toDataURL(token);
 
-            // 2. Convert to QR Base64
-            const qrString = JSON.stringify(payload);
-            const qrCode = await QRCode.toDataURL(qrString);
+            // 3. Persist QR Pass record
+            await QRPass.create({
+                visitorId: visitor._id,
+                qrCode,
+                token,
+                expiresAt
+            });
 
-            // 3. Persist only if NOT mock
-            if (!isMock) {
-                await QRPass.create({
-                    visitorId: visitor._id,
-                    qrCode,
-                    expiresAt
-                });
-            }
-
-            return { qrCode, expiresAt };
+            return { qrCode, expiresAt, token };
 
         } catch (err) {
-            console.error('QR Generation/Storage Error:', err);
+            console.error('QR Generation Error:', err);
             throw new Error('Failed to generate secure QR pass');
         }
     }
 
     /**
-     * Validates a scanned QR payload (Static check)
-     * @param {String} scannedData - The JSON string from the QR code.
+     * Basic format check
      */
     static validateFormat(scannedData) {
-        try {
-            const data = JSON.parse(scannedData);
-            if (Date.now() > data.exp) {
-                return { valid: false, message: 'QR Code has expired' };
-            }
-            return { valid: true, data };
-        } catch (err) {
-            return { valid: false, message: 'Invalid QR Format' };
+        if (!scannedData || typeof scannedData !== 'string') {
+            return { valid: false, message: 'Invalid scanned data format' };
         }
+        // Our tokens are hex strings of 64 chars (32 bytes)
+        if (scannedData.length < 32) {
+             return { valid: false, message: 'Invalid QR Token structure' };
+        }
+        return { valid: true };
     }
 }
 
