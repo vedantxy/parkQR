@@ -4,9 +4,10 @@ import LoginPage from './pages/LoginPage';
 import AdminPanel from './pages/AdminPanel';
 import GuardScanner from './pages/GuardScanner';
 import VisitorEntry from './pages/VisitorEntry';
+import BookingPage from './pages/BookingPage';
 import { 
   LayoutDashboard, UserPlus, ScanLine, ShieldCheck, 
-  LogOut, Bell, Settings, Search, Menu, X 
+  LogOut, Bell, Settings, Search, Menu, X, ParkingSquare 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -16,6 +17,7 @@ const SaaSLayout = ({ children, activeTab, setActiveTab }) => {
 
     const navItems = [
         { id: 'dashboard', label: 'Overview', icon: <LayoutDashboard size={20}/>, roles: ['admin', 'guard'] },
+        { id: 'booking', label: 'Book Slot', icon: <ParkingSquare size={20}/>, roles: ['admin', 'guard'] },
         { id: 'visitors', label: 'Visitors', icon: <UserPlus size={20}/>, roles: ['admin', 'guard'] },
         { id: 'scanner', label: 'Terminal', icon: <ScanLine size={20}/>, roles: ['admin', 'guard'] },
     ];
@@ -160,6 +162,7 @@ const AppContent = () => {
             <MouseGlow />
             <SaaSLayout activeTab={activeTab} setActiveTab={setActiveTab}>
                 {activeTab === 'dashboard' && <AdminPanel />}
+                {activeTab === 'booking' && <BookingPage />}
                 {activeTab === 'visitors' && <VisitorEntry />}
                 {activeTab === 'scanner' && <GuardScanner />}
             </SaaSLayout>
