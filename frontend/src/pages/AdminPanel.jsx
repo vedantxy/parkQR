@@ -1,136 +1,239 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Activity, Users, LayoutDashboard, ShieldCheck, 
-  ChevronRight, BarChart3, Database, AlertTriangle 
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+import {
+  Users, Car, ParkingSquare, AlertTriangle, TrendingUp, TrendingDown,
+  ArrowRight, Clock, UserPlus, Eye, MapPin
 } from 'lucide-react';
-import ParkingGrid from '../components/ParkingGrid';
-import AnalyticsDashboard from '../components/AnalyticsDashboard';
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-const AdminPanel = () => {
-    const [view, setView] = useState('insights');
+const weekData = [
+  { day: 'Mon', visitors: 42 },
+  { day: 'Tue', visitors: 58 },
+  { day: 'Wed', visitors: 35 },
+  { day: 'Thu', visitors: 71 },
+  { day: 'Fri', visitors: 63 },
+  { day: 'Sat', visitors: 89 },
+  { day: 'Sun', visitors: 47 },
+];
 
-    return (
-        <div className="space-y-8 pb-20">
-            {/* Real-time Hero Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard label="Direct Occupancy" val="78%" trend="+12" icon={<Activity />} color="text-primary" />
-                <StatCard label="Active Sessions" val="1.2k" trend="+5" icon={<Users />} color="text-success" />
-                <StatCard label="API Latency" val="44ms" trend="-3" icon={<Database />} color="text-amber-500" />
-                <StatCard label="Threat Level" val="Minimal" trend="Stable" icon={<ShieldCheck />} color="text-primary" />
-            </div>
+const hourData = [
+  { hour: '6am', count: 5 },
+  { hour: '8am', count: 22 },
+  { hour: '10am', count: 38 },
+  { hour: '12pm', count: 45 },
+  { hour: '2pm', count: 31 },
+  { hour: '4pm', count: 28 },
+  { hour: '6pm', count: 42 },
+  { hour: '8pm', count: 18 },
+  { hour: '10pm', count: 8 },
+];
 
-            {/* View Switcher */}
-            <div className="flex items-center gap-8 border-b border-white/5 pb-0">
-                <ViewLink 
-                    active={view === 'insights'} 
-                    onClick={() => setView('insights')} 
-                    icon={<BarChart3 size={18}/>} 
-                    label="AI Insights" 
-                />
-                <ViewLink 
-                    active={view === 'grid'} 
-                    onClick={() => setView('grid')} 
-                    icon={<LayoutDashboard size={18}/>} 
-                    label="Live Grid" 
-                />
-                <ViewLink 
-                    active={view === 'security'} 
-                    onClick={() => setView('security')} 
-                    icon={<AlertTriangle size={18}/>} 
-                    label="Security Logs" 
-                />
-            </div>
+const recentVisitors = [
+  { id: 1, name: 'Rahul Sharma', vehicle: 'MH 02 AB 1234', flat: 'A-401', time: '10:32 AM', status: 'inside' },
+  { id: 2, name: 'Priya Patel', vehicle: 'MH 04 CD 5678', flat: 'B-202', time: '10:15 AM', status: 'inside' },
+  { id: 3, name: 'Amit Kumar', vehicle: 'MH 01 EF 9012', flat: 'C-103', time: '09:48 AM', status: 'exited' },
+  { id: 4, name: 'Neha Singh', vehicle: 'MH 03 GH 3456', flat: 'A-505', time: '09:30 AM', status: 'overstay' },
+  { id: 5, name: 'Ravi Joshi', vehicle: 'MH 12 IJ 7890', flat: 'D-301', time: '09:12 AM', status: 'exited' },
+];
 
-            {/* Dynamic Viewport */}
-            <div className="min-h-[500px]">
-                <AnimatePresence mode="wait">
-                    <motion.div
-                        key={view}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                    >
-                        {view === 'grid' && <ParkingGrid />}
-                        {view === 'insights' && <AnalyticsDashboard />}
-                        {view === 'security' && <SecurityPanel />}
-                    </motion.div>
-                </AnimatePresence>
-            </div>
+const StatCard = ({ icon: Icon, label, value, change, changeType, color }) => {
+  const colorMap = {
+    blue: { bg: 'bg-primary-50', border: 'border-l-primary', icon: 'text-primary', changeBg: 'bg-primary-50 text-primary' },
+    green: { bg: 'bg-success-50', border: 'border-l-success', icon: 'text-success', changeBg: 'bg-success-50 text-success' },
+    amber: { bg: 'bg-warning-50', border: 'border-l-warning', icon: 'text-warning', changeBg: 'bg-warning-50 text-warning' },
+    red: { bg: 'bg-danger-50', border: 'border-l-danger', icon: 'text-danger', changeBg: 'bg-danger-50 text-danger' },
+  };
+  const c = colorMap[color];
+
+  return (
+    <div className={`bg-white rounded-card border border-border border-l-4 ${c.border} p-5 shadow-card hover:shadow-card-hover transition-shadow duration-200`}>
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-sm font-medium text-txt-secondary">{label}</p>
+          <p className="text-3xl font-bold text-txt-primary mt-1">{value}</p>
         </div>
-    );
+        <div className={`h-10 w-10 ${c.bg} rounded-card flex items-center justify-center`}>
+          <Icon size={20} className={c.icon} />
+        </div>
+      </div>
+      <div className="mt-3 flex items-center gap-1.5">
+        {changeType === 'up' ? (
+          <TrendingUp size={14} className="text-success" />
+        ) : (
+          <TrendingDown size={14} className="text-danger" />
+        )}
+        <span className={`text-xs font-semibold ${changeType === 'up' ? 'text-success' : 'text-danger'}`}>
+          {change}
+        </span>
+        <span className="text-xs text-txt-muted">vs yesterday</span>
+      </div>
+    </div>
+  );
 };
 
-const StatCard = ({ label, val, trend, icon, color }) => (
-    <div className="bg-white/5 border border-white/10 rounded-[32px] p-6 hover:border-primary/40 transition-all group overflow-hidden relative">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl -mr-16 -mt-16 group-hover:bg-primary/10 transition-all"></div>
-        <div className="flex justify-between items-start mb-6">
-            <div className={`p-3 bg-white/5 rounded-2xl ${color} group-hover:scale-110 transition-all`}>
-                {icon}
-            </div>
-            <div className="bg-success/10 text-success text-[10px] font-black px-2 py-1 rounded-lg italic tracking-widest">{trend}%</div>
-        </div>
-        <p className="text-slate-500 text-[10px] font-black uppercase tracking-[2px] mb-1">{label}</p>
-        <h3 className="text-3xl font-black">{val}</h3>
-    </div>
-);
+const StatusBadge = ({ status }) => {
+  const map = {
+    inside: 'bg-success-50 text-success border-success/20',
+    exited: 'bg-gray-100 text-txt-secondary border-gray-200',
+    overstay: 'bg-danger-50 text-danger border-danger/20',
+    coming: 'bg-warning-50 text-warning border-warning/20',
+  };
 
-const ViewLink = ({ active, onClick, icon, label }) => (
-    <button 
-        onClick={onClick}
-        className={`flex items-center gap-2 pb-4 px-2 font-bold text-sm tracking-tight transition-all relative
-            ${active ? 'text-primary' : 'text-slate-500 hover:text-white'}`}
-    >
-        {icon}
-        {label}
-        {active && (
-            <motion.div 
-                layoutId="nav-active"
-                className="absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-t-full shadow-[0_-4px_12px_rgba(37,99,235,0.4)]"
-            />
-        )}
+  return (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${map[status] || map.coming}`}>
+      {status === 'overstay' && <span className="w-1.5 h-1.5 bg-danger rounded-full mr-1.5 animate-pulse" />}
+      {status.charAt(0).toUpperCase() + status.slice(1)}
+    </span>
+  );
+};
+
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white border border-border rounded-btn shadow-card px-3 py-2">
+        <p className="text-xs font-semibold text-txt-primary">{label}</p>
+        <p className="text-xs text-primary font-bold">{payload[0].value} visitors</p>
+      </div>
+    );
+  }
+  return null;
+};
+
+const AdminPanel = () => {
+  return (
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-txt-primary">Dashboard</h1>
+          <p className="text-sm text-txt-secondary mt-0.5">Real-time overview of your parking facility</p>
+        </div>
+        <div className="flex items-center gap-2 text-sm text-txt-muted bg-white border border-border rounded-btn px-3 py-2">
+          <Clock size={14} />
+          <span className="font-medium">Today, {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+        </div>
+      </div>
+
+      {/* Stat Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard icon={Users} label="Visitors Today" value="127" change="+12%" changeType="up" color="blue" />
+        <StatCard icon={Car} label="Currently Inside" value="34" change="+8%" changeType="up" color="green" />
+        <StatCard icon={ParkingSquare} label="Available Slots" value="48" change="-5%" changeType="down" color="amber" />
+        <StatCard icon={AlertTriangle} label="Overstay Alerts" value="3" change="+2" changeType="up" color="red" />
+      </div>
+
+      {/* Charts Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Visitor Trend */}
+        <div className="bg-white rounded-card border border-border p-5 shadow-card">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-txt-primary">Visitor Trend</h3>
+            <span className="text-xs text-txt-muted font-medium bg-surface px-2 py-1 rounded">Last 7 days</span>
+          </div>
+          <ResponsiveContainer width="100%" height={240}>
+            <AreaChart data={weekData}>
+              <defs>
+                <linearGradient id="colorVisitors" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#2563EB" stopOpacity={0.1} />
+                  <stop offset="95%" stopColor="#2563EB" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
+              <XAxis dataKey="day" tick={{ fontSize: 12, fill: '#64748B' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 12, fill: '#64748B' }} axisLine={false} tickLine={false} />
+              <Tooltip content={<CustomTooltip />} />
+              <Area type="monotone" dataKey="visitors" stroke="#2563EB" strokeWidth={2} fill="url(#colorVisitors)" />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Peak Hours */}
+        <div className="bg-white rounded-card border border-border p-5 shadow-card">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-txt-primary">Peak Hours</h3>
+            <span className="text-xs text-txt-muted font-medium bg-surface px-2 py-1 rounded">Today</span>
+          </div>
+          <ResponsiveContainer width="100%" height={240}>
+            <BarChart data={hourData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
+              <XAxis dataKey="hour" tick={{ fontSize: 11, fill: '#64748B' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 12, fill: '#64748B' }} axisLine={false} tickLine={false} />
+              <Tooltip content={<CustomTooltip />} />
+              <Bar dataKey="count" fill="#2563EB" radius={[4, 4, 0, 0]} barSize={28} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Recent Visitors Table + Quick Actions */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Table */}
+        <div className="lg:col-span-2 bg-white rounded-card border border-border shadow-card">
+          <div className="p-5 border-b border-border flex items-center justify-between">
+            <h3 className="font-semibold text-txt-primary">Recent Visitors</h3>
+            <button className="text-xs text-primary font-semibold hover:underline flex items-center gap-1">
+              View All <ArrowRight size={12} />
+            </button>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-surface">
+                  <th className="text-left py-3 px-5 text-xs font-semibold text-txt-muted uppercase tracking-wider">Visitor</th>
+                  <th className="text-left py-3 px-5 text-xs font-semibold text-txt-muted uppercase tracking-wider">Vehicle</th>
+                  <th className="text-left py-3 px-5 text-xs font-semibold text-txt-muted uppercase tracking-wider">Flat</th>
+                  <th className="text-left py-3 px-5 text-xs font-semibold text-txt-muted uppercase tracking-wider">Time</th>
+                  <th className="text-left py-3 px-5 text-xs font-semibold text-txt-muted uppercase tracking-wider">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentVisitors.map((v) => (
+                  <tr key={v.id} className="border-b border-border last:border-0 hover:bg-surface-hover transition-colors duration-150">
+                    <td className="py-3.5 px-5 font-medium text-txt-primary">{v.name}</td>
+                    <td className="py-3.5 px-5 text-txt-secondary font-mono text-xs">{v.vehicle}</td>
+                    <td className="py-3.5 px-5 text-txt-secondary">{v.flat}</td>
+                    <td className="py-3.5 px-5 text-txt-secondary">{v.time}</td>
+                    <td className="py-3.5 px-5"><StatusBadge status={v.status} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="bg-white rounded-card border border-border shadow-card p-5 flex flex-col gap-3">
+          <h3 className="font-semibold text-txt-primary mb-1">Quick Actions</h3>
+          <QuickAction icon={UserPlus} label="Add Visitor" desc="Register new visitor entry" color="primary" />
+          <QuickAction icon={Eye} label="View All Visitors" desc="See complete visitor log" color="success" />
+          <QuickAction icon={MapPin} label="Parking Map" desc="View real-time slot grid" color="warning" />
+          <QuickAction icon={AlertTriangle} label="Overstay Alerts" desc="3 active alerts" color="danger" />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const QuickAction = ({ icon: Icon, label, desc, color }) => {
+  const colorMap = {
+    primary: 'bg-primary-50 text-primary hover:bg-primary-100',
+    success: 'bg-success-50 text-success hover:bg-success-100',
+    warning: 'bg-warning-50 text-warning hover:bg-warning-100',
+    danger: 'bg-danger-50 text-danger hover:bg-danger-100',
+  };
+
+  return (
+    <button className={`w-full flex items-center gap-3 p-3 rounded-btn ${colorMap[color]} transition-all duration-200 text-left group`}>
+      <div className="h-9 w-9 rounded-lg flex items-center justify-center bg-white/60 flex-shrink-0">
+        <Icon size={18} />
+      </div>
+      <div>
+        <p className="text-sm font-semibold">{label}</p>
+        <p className="text-xs opacity-70">{desc}</p>
+      </div>
+      <ArrowRight size={14} className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
     </button>
-);
-
-const SecurityPanel = () => (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 bg-white/5 border border-white/10 rounded-[32px] p-8">
-            <h3 className="text-xl font-black mb-6 flex items-center gap-3">
-                <Database className="text-primary" /> Master Access Logs
-            </h3>
-            <div className="space-y-4">
-                <SecurityRow type="ENTRY" gate="North" time="10:22:04" />
-                <SecurityRow type="EXIT" gate="West" time="10:25:55" />
-                <SecurityRow type="DENIED" gate="South" time="10:30:12" isError />
-                <SecurityRow type="ENTRY" gate="North" time="10:35:44" />
-            </div>
-        </div>
-        <div className="bg-white/5 border border-white/10 rounded-[32px] p-8">
-            <h3 className="text-xl font-black mb-6">Threat Intelligence</h3>
-            <div className="space-y-6">
-                 <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex gap-4">
-                    <AlertTriangle className="text-red-500 flex-shrink-0" />
-                    <div>
-                        <p className="text-sm font-black text-white">Unauthorized Access</p>
-                        <p className="text-xs text-slate-400 mt-1">Token RE-55 detected at Gate B without clearance.</p>
-                    </div>
-                 </div>
-            </div>
-        </div>
-    </div>
-);
-
-const SecurityRow = ({ type, gate, time, isError }) => (
-    <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-white/10 transition-all">
-        <div className="flex items-center gap-4">
-             <div className={`text-[10px] font-black px-2 py-1 rounded-md ${isError ? 'bg-red-500 text-white' : 'bg-primary text-white'}`}>{type}</div>
-             <div>
-                <p className="text-sm font-bold">Gate {gate}</p>
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{time} UTC</p>
-             </div>
-        </div>
-        <ChevronRight className="text-slate-600" size={16} />
-    </div>
-);
+  );
+};
 
 export default AdminPanel;

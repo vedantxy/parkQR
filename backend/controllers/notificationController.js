@@ -1,6 +1,7 @@
 const Notification = require('../models/Notification');
 const ParkingSlot = require('../models/ParkingSlot');
 const { isDBConnected, mockStore } = require('../utils/mockData');
+const { sendOverstayAlert } = require('../utils/smsService');
 
 /**
  * @desc    Get all notifications (latest first)
@@ -74,6 +75,12 @@ async function processOverstays(occupiedSlots, io) {
                 io.emit('visitor-overstayed', { slotId: slot.slotId, duration });
                 io.emit('notification-added', notif);
             }
+            
+            // Send Overstay SMS Alert to Resident
+            // Note: Since we don't have direct access to resident phone here,
+            // we'll fetch visitor or use fallback (demo purposes).
+            // In a real scenario, we would populate slot.visitorId and then get the resident phone.
+            await sendOverstayAlert(process.env.TWILIO_PHONE, `Vehicle ${slot.vehicle || slot.slotId}`, duration);
             
             detectedCount++;
         }

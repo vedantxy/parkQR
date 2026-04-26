@@ -13,7 +13,12 @@ import { doc, getDoc } from 'firebase/firestore';
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    // Check local storage for custom JWT token on load
+    const savedToken = localStorage.getItem('parksmart_token');
+    const savedUser = localStorage.getItem('parksmart_user');
+    return savedToken && savedUser ? JSON.parse(savedUser) : null;
+  });
   const [loading, setLoading] = useState(true);
 
   // Listen for Firebase auth state changes (handles page refresh, persistence, etc.)
@@ -41,8 +46,7 @@ export const AuthProvider = ({ children }) => {
           };
           setUser(userData);
         } catch (firestoreErr) {
-          // Firestore read might fail (rules, offline, etc.) — still log in with basic info
-          console.warn('⚠️ Firestore user profile read failed:', firestoreErr.message);
+          // Firestore read might fail (offline, missing rules). Silently fallback to basic profile.
           setUser({
             uid: firebaseUser.uid,
             email: firebaseUser.email,
@@ -52,7 +56,10 @@ export const AuthProvider = ({ children }) => {
           });
         }
       } else {
-        setUser(null);
+        // If not a custom backend user, clear it.
+        if (!localStorage.getItem('parksmart_token')) {
+          setUser(null);
+        }
       }
       setLoading(false);
     });
@@ -130,21 +137,64 @@ export const AuthProvider = ({ children }) => {
   };
 
   /**
+   * Request OTP from backend
+   */
+  const requestOtp = async (phone) => {
+    try {
+      const res = await fetch('http://localhost:5000/api/users/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone })
+      });
+      const data = await res.json();
+      return { success: data.success, message: data.message };
+    } catch (err) {
+      return { success: false, message: 'Failed to connect to server' };
+    }
+  };
+
+  /**
+   * Verify OTP and login via backend JWT
+   */
+  const loginWithOtp = async (phone, otp) => {
+    try {
+      const res = await fetch('http://localhost:5000/api/users/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, otp })
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        localStorage.setItem('parksmart_token', data.token);
+        localStorage.setItem('parksmart_user', JSON.stringify(data.user));
+        setUser(data.user);
+        return { success: true };
+      } else {
+        return { success: false, message: data.message };
+      }
+    } catch (err) {
+      return { success: false, message: 'Failed to verify OTP' };
+    }
+  };
+
+  /**
    * Sign out and clear Firebase session
    */
   const logout = async () => {
     try {
       await signOut(auth);
-      // onAuthStateChanged will set user to null
     } catch (err) {
       console.error('🔐 Logout Error:', err);
-      // Force-clear even if signOut fails
+    } finally {
+      localStorage.removeItem('parksmart_token');
+      localStorage.removeItem('parksmart_user');
       setUser(null);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, requestOtp, loginWithOtp, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

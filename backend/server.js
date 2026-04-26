@@ -36,6 +36,7 @@ app.use('/api/parking', require('./routes/parkingRoutes'));
 app.use('/api/qr', require('./routes/qrRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/analytics', require('./routes/analyticsRoutes'));
+app.use('/api/ai', require('./routes/aiRoutes'));
 
 // Background Monitor: Check for overstays every 30 seconds
 const { checkOverstays } = require('./controllers/notificationController');

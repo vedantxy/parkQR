@@ -4,6 +4,7 @@ const ParkingSlot = require('../models/ParkingSlot');
 const Notification = require('../models/Notification');
 const mongoose = require('mongoose');
 const QRService = require('../utils/qrService');
+const { sendEntryAlert } = require('../utils/smsService');
 
 const { isDBConnected, mockStore } = require('../utils/mockData');
 
@@ -134,6 +135,7 @@ exports.scanQR = async (req, res) => {
         visitor.entryTime = new Date();
         visitor.gate = gateName || 'Mock Gate';
         message = 'ENTRY SUCCESS (MOCK)';
+        await sendEntryAlert(visitor.phone, visitor.name, visitor.vehicle);
     } else if (visitor.status === 'inside') {
         visitor.status = 'exited';
         visitor.exitTime = new Date();
@@ -190,6 +192,9 @@ async function handleActualScan(req, res, visitor, qrPass, gateName) {
       };
       assignedSlotData = slot;
       message = `ENTRY GRANTED: Slot ${slot.slotId}`;
+      
+      // Notify Resident (using visitor phone for demo, swap with resident lookup in prod)
+      await sendEntryAlert(visitor.phone, visitor.name, visitor.vehicle);
     } 
     else if (visitor.status === "inside") {
       // --- SECURE EXIT ---
