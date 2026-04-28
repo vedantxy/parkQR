@@ -1,32 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
+import { motion } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import AppLayout from './components/AppLayout';
-import LoginPage from './pages/LoginPage';
-import AdminPanel from './pages/AdminPanel';
-import BookingPage from './pages/BookingPage';
-import VisitorEntry from './pages/VisitorEntry';
-import GuardScanner from './pages/GuardScanner';
-import AnalyticsDashboard from './pages/AnalyticsDashboard';
-import NotificationsPage from './pages/NotificationsPage';
-import UserDashboard from './pages/UserDashboard';
-import AIChatbot from './components/AIChatbot';
+import DashboardSkeleton from './components/DashboardSkeleton';
+import NeuralLoader from './components/NeuralLoader';
+
+// Lazy load pages for performance
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const AdminPanel = lazy(() => import('./pages/AdminPanel'));
+const BookingPage = lazy(() => import('./pages/BookingPage'));
+const VisitorEntry = lazy(() => import('./pages/VisitorEntry'));
+const GuardScanner = lazy(() => import('./pages/GuardScanner'));
+const AnalyticsDashboard = lazy(() => import('./pages/AnalyticsDashboard'));
+const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
+const UserDashboard = lazy(() => import('./pages/UserDashboard'));
+const AIChatbot = lazy(() => import('./components/AIChatbot'));
 
 const AppContent = () => {
   const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
 
-  if (loading) return (
-    <div className="h-screen w-screen bg-surface flex flex-col items-center justify-center font-inter">
-      <div className="h-12 w-12 border-3 border-primary-200 border-t-primary rounded-full animate-spin" style={{ borderWidth: '3px' }} />
-      <p className="mt-5 text-txt-muted font-medium text-sm tracking-wide">Loading ParkSmart AI...</p>
-    </div>
+  // Initial Startup Loader (Prevents Flicker)
+  if (loading) return <NeuralLoader />;
+
+  // If we are logged in but dashboard isn't showing, it might be a routing issue
+  // Let's ensure activeTab defaults to dashboard if none matches
+  const currentTab = activeTab || 'dashboard';
+
+  if (!user) return (
+    <Suspense fallback={<NeuralLoader />}>
+      <LoginPage />
+    </Suspense>
   );
 
-  if (!user) return <LoginPage />;
-
   const renderPage = () => {
-    switch (activeTab) {
+    switch (currentTab) {
       case 'dashboard': return <AdminPanel />;
       case 'booking': return <BookingPage />;
       case 'visitors': return <VisitorEntry />;
@@ -39,12 +48,12 @@ const AppContent = () => {
   };
 
   return (
-    <>
+    <Suspense fallback={<DashboardSkeleton />}>
       <AppLayout activeTab={activeTab} setActiveTab={setActiveTab}>
         {renderPage()}
       </AppLayout>
       <AIChatbot />
-    </>
+    </Suspense>
   );
 };
 

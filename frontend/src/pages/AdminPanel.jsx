@@ -1,238 +1,327 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-import {
-  Users, Car, ParkingSquare, AlertTriangle, TrendingUp, TrendingDown,
-  ArrowRight, Clock, UserPlus, Eye, MapPin
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Plus, LayoutGrid, MessageSquare, 
+  Calendar, MapPin, TrendingUp, TrendingDown,
+  Clock, MoreHorizontal, ChevronRight, Navigation
 } from 'lucide-react';
-import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-
-const weekData = [
-  { day: 'Mon', visitors: 42 },
-  { day: 'Tue', visitors: 58 },
-  { day: 'Wed', visitors: 35 },
-  { day: 'Thu', visitors: 71 },
-  { day: 'Fri', visitors: 63 },
-  { day: 'Sat', visitors: 89 },
-  { day: 'Sun', visitors: 47 },
-];
-
-const hourData = [
-  { hour: '6am', count: 5 },
-  { hour: '8am', count: 22 },
-  { hour: '10am', count: 38 },
-  { hour: '12pm', count: 45 },
-  { hour: '2pm', count: 31 },
-  { hour: '4pm', count: 28 },
-  { hour: '6pm', count: 42 },
-  { hour: '8pm', count: 18 },
-  { hour: '10pm', count: 8 },
-];
-
-const recentVisitors = [
-  { id: 1, name: 'Rahul Sharma', vehicle: 'MH 02 AB 1234', flat: 'A-401', time: '10:32 AM', status: 'inside' },
-  { id: 2, name: 'Priya Patel', vehicle: 'MH 04 CD 5678', flat: 'B-202', time: '10:15 AM', status: 'inside' },
-  { id: 3, name: 'Amit Kumar', vehicle: 'MH 01 EF 9012', flat: 'C-103', time: '09:48 AM', status: 'exited' },
-  { id: 4, name: 'Neha Singh', vehicle: 'MH 03 GH 3456', flat: 'A-505', time: '09:30 AM', status: 'overstay' },
-  { id: 5, name: 'Ravi Joshi', vehicle: 'MH 12 IJ 7890', flat: 'D-301', time: '09:12 AM', status: 'exited' },
-];
-
-const StatCard = ({ icon: Icon, label, value, change, changeType, color }) => {
-  const colorMap = {
-    blue: { bg: 'bg-primary-50', border: 'border-l-primary', icon: 'text-primary', changeBg: 'bg-primary-50 text-primary' },
-    green: { bg: 'bg-success-50', border: 'border-l-success', icon: 'text-success', changeBg: 'bg-success-50 text-success' },
-    amber: { bg: 'bg-warning-50', border: 'border-l-warning', icon: 'text-warning', changeBg: 'bg-warning-50 text-warning' },
-    red: { bg: 'bg-danger-50', border: 'border-l-danger', icon: 'text-danger', changeBg: 'bg-danger-50 text-danger' },
-  };
-  const c = colorMap[color];
-
-  return (
-    <div className={`bg-white rounded-card border border-border border-l-4 ${c.border} p-5 shadow-card hover:shadow-card-hover transition-shadow duration-200`}>
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm font-medium text-txt-secondary">{label}</p>
-          <p className="text-3xl font-bold text-txt-primary mt-1">{value}</p>
-        </div>
-        <div className={`h-10 w-10 ${c.bg} rounded-card flex items-center justify-center`}>
-          <Icon size={20} className={c.icon} />
-        </div>
-      </div>
-      <div className="mt-3 flex items-center gap-1.5">
-        {changeType === 'up' ? (
-          <TrendingUp size={14} className="text-success" />
-        ) : (
-          <TrendingDown size={14} className="text-danger" />
-        )}
-        <span className={`text-xs font-semibold ${changeType === 'up' ? 'text-success' : 'text-danger'}`}>
-          {change}
-        </span>
-        <span className="text-xs text-txt-muted">vs yesterday</span>
-      </div>
-    </div>
-  );
-};
-
-const StatusBadge = ({ status }) => {
-  const map = {
-    inside: 'bg-success-50 text-success border-success/20',
-    exited: 'bg-gray-100 text-txt-secondary border-gray-200',
-    overstay: 'bg-danger-50 text-danger border-danger/20',
-    coming: 'bg-warning-50 text-warning border-warning/20',
-  };
-
-  return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${map[status] || map.coming}`}>
-      {status === 'overstay' && <span className="w-1.5 h-1.5 bg-danger rounded-full mr-1.5 animate-pulse" />}
-      {status.charAt(0).toUpperCase() + status.slice(1)}
-    </span>
-  );
-};
-
-const CustomTooltip = ({ active, payload, label }) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-white border border-border rounded-btn shadow-card px-3 py-2">
-        <p className="text-xs font-semibold text-txt-primary">{label}</p>
-        <p className="text-xs text-primary font-bold">{payload[0].value} visitors</p>
-      </div>
-    );
-  }
-  return null;
-};
+import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
+import { 
+  ResponsiveContainer, BarChart, Bar, XAxis, YAxis, 
+  CartesianGrid, Tooltip, Cell, LineChart, Line 
+} from 'recharts';
 
 const AdminPanel = () => {
+  const { theme } = useTheme();
+  const { user } = useAuth();
+  const [selectedSlot, setSelectedSlot] = useState('A3');
+  const [activeZone, setActiveZone] = useState('Zone A');
+
+  // Mock Data
+  const stats = [
+    { label: 'Active Users', value: '2,840', growth: '+12.5%', isUp: true },
+    { label: 'Bookings Today', value: '482', growth: '+3.1%', isUp: true },
+    { label: 'Available Spaces', value: '156', growth: '-2.4%', isUp: false },
+  ];
+
+  const parkingSlots = [
+    { id: 'A1', status: 'occupied', carColor: '#3B82F6' },
+    { id: 'A2', status: 'occupied', carColor: '#EF4444' },
+    { id: 'A3', status: 'selected', carColor: '#F59E0B' },
+    { id: 'A4', status: 'available' },
+    { id: 'A5', status: 'occupied', carColor: '#10B981' },
+    { id: 'A6', status: 'available' },
+    { id: 'A7', status: 'occupied', carColor: '#6366F1' },
+    { id: 'A8', status: 'available' },
+  ];
+
+  const chartData = [
+    { name: 'Jan', value: 400 }, { name: 'Feb', value: 300 },
+    { name: 'Mar', value: 600 }, { name: 'Apr', value: 800 },
+    { name: 'May', value: 500 }, { name: 'Jun', value: 900 },
+  ];
+
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-txt-primary">Dashboard</h1>
-          <p className="text-sm text-txt-secondary mt-0.5">Real-time overview of your parking facility</p>
-        </div>
-        <div className="flex items-center gap-2 text-sm text-txt-muted bg-white border border-border rounded-btn px-3 py-2">
-          <Clock size={14} />
-          <span className="font-medium">Today, {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-        </div>
+    <div className="space-y-8 pb-12">
+      
+      {/* A. Info Cards Section (Top Section) */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <InfoTag label="Area Name" value="Downtown" />
+        <InfoTag label="Customer" value="Plaza Corp" />
+        <InfoTag label="City" value="San Francisco" />
+        <InfoTag label="Code" value="PRK-902" />
+        <InfoTag label="Address" value="5th Ave, 102" />
       </div>
 
-      {/* Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={Users} label="Visitors Today" value="127" change="+12%" changeType="up" color="blue" />
-        <StatCard icon={Car} label="Currently Inside" value="34" change="+8%" changeType="up" color="green" />
-        <StatCard icon={ParkingSquare} label="Available Slots" value="48" change="-5%" changeType="down" color="amber" />
-        <StatCard icon={AlertTriangle} label="Overstay Alerts" value="3" change="+2" changeType="up" color="red" />
-      </div>
-
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Visitor Trend */}
-        <div className="bg-white rounded-card border border-border p-5 shadow-card">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-txt-primary">Visitor Trend</h3>
-            <span className="text-xs text-txt-muted font-medium bg-surface px-2 py-1 rounded">Last 7 days</span>
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+        
+        {/* Left Column (8 cols) */}
+        <div className="xl:col-span-8 space-y-8">
+          
+          {/* B. Stats Row */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {stats.map((stat, i) => (
+              <motion.div 
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                className="card-automotive p-6 flex flex-col justify-between h-40"
+              >
+                <div className="flex justify-between items-start">
+                  <p className="text-[10px] font-black text-[var(--txt-secondary)] uppercase tracking-[0.2em]">{stat.label}</p>
+                  <span className={`text-[10px] font-black px-2 py-1 rounded-lg ${stat.isUp ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'}`}>
+                    {stat.growth}
+                  </span>
+                </div>
+                <div className="flex items-end justify-between">
+                  <h2 className="text-3xl font-black text-[var(--txt-primary)] tracking-tighter">{stat.value}</h2>
+                  <div className="flex gap-1 h-8 items-end">
+                    {[0.4, 0.7, 0.5, 0.9, 0.6, 1].map((h, j) => (
+                      <div key={j} className="w-1 bg-[var(--accent)] opacity-20 rounded-full" style={{ height: `${h * 100}%` }} />
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
           </div>
-          <ResponsiveContainer width="100%" height={240}>
-            <AreaChart data={weekData}>
-              <defs>
-                <linearGradient id="colorVisitors" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#2563EB" stopOpacity={0.1} />
-                  <stop offset="95%" stopColor="#2563EB" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
-              <XAxis dataKey="day" tick={{ fontSize: 12, fill: '#64748B' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 12, fill: '#64748B' }} axisLine={false} tickLine={false} />
-              <Tooltip content={<CustomTooltip />} />
-              <Area type="monotone" dataKey="visitors" stroke="#2563EB" strokeWidth={2} fill="url(#colorVisitors)" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
 
-        {/* Peak Hours */}
-        <div className="bg-white rounded-card border border-border p-5 shadow-card">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-txt-primary">Peak Hours</h3>
-            <span className="text-xs text-txt-muted font-medium bg-surface px-2 py-1 rounded">Today</span>
-          </div>
-          <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={hourData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
-              <XAxis dataKey="hour" tick={{ fontSize: 11, fill: '#64748B' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 12, fill: '#64748B' }} axisLine={false} tickLine={false} />
-              <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="count" fill="#2563EB" radius={[4, 4, 0, 0]} barSize={28} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Recent Visitors Table + Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Table */}
-        <div className="lg:col-span-2 bg-white rounded-card border border-border shadow-card">
-          <div className="p-5 border-b border-border flex items-center justify-between">
-            <h3 className="font-semibold text-txt-primary">Recent Visitors</h3>
-            <button className="text-xs text-primary font-semibold hover:underline flex items-center gap-1">
-              View All <ArrowRight size={12} />
-            </button>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border bg-surface">
-                  <th className="text-left py-3 px-5 text-xs font-semibold text-txt-muted uppercase tracking-wider">Visitor</th>
-                  <th className="text-left py-3 px-5 text-xs font-semibold text-txt-muted uppercase tracking-wider">Vehicle</th>
-                  <th className="text-left py-3 px-5 text-xs font-semibold text-txt-muted uppercase tracking-wider">Flat</th>
-                  <th className="text-left py-3 px-5 text-xs font-semibold text-txt-muted uppercase tracking-wider">Time</th>
-                  <th className="text-left py-3 px-5 text-xs font-semibold text-txt-muted uppercase tracking-wider">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentVisitors.map((v) => (
-                  <tr key={v.id} className="border-b border-border last:border-0 hover:bg-surface-hover transition-colors duration-150">
-                    <td className="py-3.5 px-5 font-medium text-txt-primary">{v.name}</td>
-                    <td className="py-3.5 px-5 text-txt-secondary font-mono text-xs">{v.vehicle}</td>
-                    <td className="py-3.5 px-5 text-txt-secondary">{v.flat}</td>
-                    <td className="py-3.5 px-5 text-txt-secondary">{v.time}</td>
-                    <td className="py-3.5 px-5"><StatusBadge status={v.status} /></td>
-                  </tr>
+          {/* C. Parking Grid */}
+          <div className="card-automotive p-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+              <div>
+                <h3 className="text-lg font-black text-[var(--txt-primary)]">Downtown Plaza Parking</h3>
+                <div className="flex items-center gap-2 mt-1">
+                  <MapPin size={12} className="text-[var(--accent)]" />
+                  <span className="text-xs text-[var(--txt-secondary)] font-bold uppercase tracking-wider">Zone A · Level 1</span>
+                </div>
+              </div>
+              
+              <div className="flex p-1 bg-[var(--bg)] rounded-xl border border-[var(--border)] self-start">
+                {['Zone A', 'Zone B', 'Zone C'].map((zone) => (
+                  <button 
+                    key={zone}
+                    onClick={() => setActiveZone(zone)}
+                    className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
+                      activeZone === zone ? 'bg-[var(--surface)] text-[var(--accent)] shadow-sm' : 'text-[var(--txt-secondary)] hover:text-[var(--txt-primary)]'
+                    }`}
+                  >
+                    {zone}
+                  </button>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 p-6 bg-[var(--bg)] rounded-[var(--radius-xl)] border border-[var(--border)] relative overflow-hidden">
+              {/* Road Visual Effect */}
+              <div className="absolute inset-0 pointer-events-none opacity-[0.03] overflow-hidden">
+                <div className="absolute left-1/2 -translate-x-1/2 w-4 h-full border-x-2 border-dashed border-white" />
+              </div>
+
+              {parkingSlots.map((slot) => (
+                <ParkingSlot 
+                  key={slot.id} 
+                  {...slot} 
+                  isSelected={selectedSlot === slot.id}
+                  onClick={() => setSelectedSlot(slot.id)}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* D. Analytics KPI */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="card-automotive p-8 flex flex-col justify-between h-64">
+              <div>
+                <h3 className="text-[10px] font-black text-[var(--txt-secondary)] uppercase tracking-[0.2em] mb-1">Total KPI</h3>
+                <p className="text-4xl font-black text-[var(--txt-primary)] tracking-tighter">87.4%</p>
+              </div>
+              <ResponsiveContainer width="100%" height={100}>
+                <BarChart data={chartData}>
+                  <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={index === 5 ? 'var(--accent)' : 'var(--border)'} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="card-automotive p-8 flex flex-col justify-between h-64">
+               <div className="flex justify-between items-start">
+                <h3 className="text-[10px] font-black text-[var(--txt-secondary)] uppercase tracking-[0.2em]">Performance</h3>
+                <TrendingUp size={20} className="text-[var(--accent)]" />
+               </div>
+               <div className="space-y-4">
+                 <PerformanceRow label="Occupancy Rate" value="92%" />
+                 <PerformanceRow label="Avg. Revenue" value="$4,280" />
+                 <PerformanceRow label="Turnover" value="12.5x" />
+               </div>
+            </div>
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="bg-white rounded-card border border-border shadow-card p-5 flex flex-col gap-3">
-          <h3 className="font-semibold text-txt-primary mb-1">Quick Actions</h3>
-          <QuickAction icon={UserPlus} label="Add Visitor" desc="Register new visitor entry" color="primary" />
-          <QuickAction icon={Eye} label="View All Visitors" desc="See complete visitor log" color="success" />
-          <QuickAction icon={MapPin} label="Parking Map" desc="View real-time slot grid" color="warning" />
-          <QuickAction icon={AlertTriangle} label="Overstay Alerts" desc="3 active alerts" color="danger" />
+        {/* Right Column (4 cols) */}
+        <div className="xl:col-span-4 space-y-8">
+          
+          {/* E. Parking Overview (Right Panel) */}
+          <div className="card-automotive p-8">
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-lg font-black text-[var(--txt-primary)]">Overview</h3>
+              <MoreHorizontal size={20} className="text-[var(--txt-secondary)] cursor-pointer" />
+            </div>
+            
+            <div className="relative h-64 flex items-center justify-center">
+              <svg className="w-48 h-48 -rotate-90">
+                <circle cx="96" cy="96" r="80" className="stroke-[var(--border)] fill-none stroke-[12]" />
+                <circle 
+                  cx="96" cy="96" r="80" 
+                  className="stroke-[var(--accent)] fill-none stroke-[12] accent-glow" 
+                  strokeDasharray="502" 
+                  strokeDashoffset="60"
+                  strokeLinecap="round" 
+                />
+              </svg>
+              <div className="absolute text-center">
+                <p className="text-4xl font-black text-[var(--txt-primary)] tracking-tighter">87%</p>
+                <p className="text-[10px] font-black text-[var(--txt-secondary)] uppercase tracking-[0.2em] mt-1">Fullness</p>
+              </div>
+            </div>
+
+            <div className="mt-8 space-y-6">
+              <OverviewItem icon={MapPin} label="Most Used Zone" sub="Zone A · Entrance" type="success" />
+              <OverviewItem icon={Clock} label="Avg. Parking Time" sub="2h 45m · Weekdays" type="primary" />
+            </div>
+          </div>
+
+          {/* F. Booking Panel */}
+          <div className="card-automotive p-8 bg-[var(--surface)] border-[var(--accent)] border-opacity-30">
+            <h3 className="text-lg font-black text-[var(--txt-primary)] mb-6 uppercase tracking-tighter">Create Booking</h3>
+            
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-[var(--txt-secondary)] uppercase tracking-[0.2em]">Parking Date</label>
+                <div className="h-12 bg-[var(--bg)] border border-[var(--border)] rounded-2xl flex items-center px-4 gap-3">
+                  <Calendar size={16} className="text-[var(--txt-secondary)]" />
+                  <span className="text-sm font-bold text-[var(--txt-primary)]">Oct 24, 2026</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-[var(--txt-secondary)] uppercase tracking-[0.2em]">Arrival</label>
+                  <div className="h-12 bg-[var(--bg)] border border-[var(--border)] rounded-2xl flex items-center px-4 gap-3 font-mono text-sm font-bold">10:30 AM</div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-[var(--txt-secondary)] uppercase tracking-[0.2em]">Exit</label>
+                  <div className="h-12 bg-[var(--bg)] border border-[var(--border)] rounded-2xl flex items-center px-4 gap-3 font-mono text-sm font-bold">02:15 PM</div>
+                </div>
+              </div>
+
+              <button className="w-full h-14 bg-[var(--accent)] text-black font-black text-xs rounded-2xl shadow-lg shadow-[var(--accent)]/20 mt-4 transition-all hover:scale-[1.02] active:scale-95 uppercase tracking-[0.2em]">
+                Confirm Booking
+              </button>
+            </div>
+          </div>
         </div>
+
       </div>
     </div>
   );
 };
 
-const QuickAction = ({ icon: Icon, label, desc, color }) => {
-  const colorMap = {
-    primary: 'bg-primary-50 text-primary hover:bg-primary-100',
-    success: 'bg-success-50 text-success hover:bg-success-100',
-    warning: 'bg-warning-50 text-warning hover:bg-warning-100',
-    danger: 'bg-danger-50 text-danger hover:bg-danger-100',
-  };
+const InfoTag = ({ label, value }) => (
+  <div className="card-automotive p-4 flex flex-col gap-1 min-w-0">
+    <span className="text-[9px] font-black text-[var(--txt-secondary)] uppercase tracking-widest truncate">{label}</span>
+    <span className="text-xs font-black text-[var(--txt-primary)] truncate">{value}</span>
+  </div>
+);
 
-  return (
-    <button className={`w-full flex items-center gap-3 p-3 rounded-btn ${colorMap[color]} transition-all duration-200 text-left group`}>
-      <div className="h-9 w-9 rounded-lg flex items-center justify-center bg-white/60 flex-shrink-0">
+const PerformanceRow = ({ label, value }) => (
+  <div className="flex items-center justify-between py-2 border-b border-[var(--border)] last:border-0">
+    <span className="text-xs font-bold text-[var(--txt-secondary)]">{label}</span>
+    <span className="text-sm font-black text-[var(--txt-primary)]">{value}</span>
+  </div>
+);
+
+const OverviewItem = ({ icon: Icon, label, sub, type }) => (
+  <div className="flex items-center justify-between group cursor-pointer">
+    <div className="flex items-center gap-3">
+      <div className={`h-10 w-10 bg-${type}/10 rounded-xl flex items-center justify-center text-${type}`}>
         <Icon size={18} />
       </div>
       <div>
-        <p className="text-sm font-semibold">{label}</p>
-        <p className="text-xs opacity-70">{desc}</p>
+        <p className="text-xs font-bold text-[var(--txt-primary)]">{label}</p>
+        <p className="text-[10px] text-[var(--txt-secondary)] uppercase font-black tracking-widest">{sub}</p>
       </div>
-      <ArrowRight size={14} className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-    </button>
+    </div>
+    <ChevronRight size={16} className="text-[var(--txt-secondary)] group-hover:translate-x-1 transition-transform" />
+  </div>
+);
+
+const ParkingSlot = ({ id, status, carColor, isSelected, onClick }) => {
+  return (
+    <motion.div 
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      onClick={onClick}
+      className={`aspect-[4/6] rounded-[24px] border-2 transition-all cursor-pointer flex flex-col items-center justify-between p-4 relative group
+        ${isSelected ? 'bg-[var(--accent)] bg-opacity-[0.08] border-[var(--accent)] shadow-[0_0_30px_rgba(var(--accent-rgb),0.1)]' : 'bg-[var(--surface)] border-[var(--border)]'}
+        ${status === 'available' ? 'border-dashed opacity-60' : ''}
+      `}
+    >
+      <span className={`text-[10px] font-black uppercase tracking-[0.2em] mb-2 ${isSelected ? 'text-[var(--accent)]' : 'text-[var(--txt-secondary)]'}`}>
+        {id}
+      </span>
+      
+      {status !== 'available' ? (
+        <motion.div 
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="w-full flex-1 flex items-center justify-center relative px-2"
+        >
+          {/* Realistic Car Container */}
+          <div className="relative w-full h-full max-h-[120px] flex items-center justify-center drop-shadow-[0_20px_30px_rgba(0,0,0,0.25)]">
+            {/* Soft Shadow Layer */}
+            <div className="absolute bottom-[-10px] w-[80%] h-[20%] bg-black/30 blur-[15px] rounded-full" />
+            
+            {/* SVG Highly Realistic Car Top View */}
+            <svg viewBox="0 0 100 180" className="w-full h-full max-w-[60px]">
+              {/* Car Body with Gradient */}
+              <defs>
+                <linearGradient id={`carGrad-${id}`} x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" style={{ stopColor: carColor, stopOpacity: 1 }} />
+                  <stop offset="50%" style={{ stopColor: 'rgba(255,255,255,0.2)', stopOpacity: 0.3 }} />
+                  <stop offset="100%" style={{ stopColor: carColor, stopOpacity: 1 }} />
+                </linearGradient>
+              </defs>
+              
+              {/* Main Chassis */}
+              <path d="M15,20 Q15,10 50,10 Q85,10 85,20 L85,160 Q85,170 50,170 Q15,170 15,160 Z" fill={carColor} />
+              
+              {/* Windshields & Glass */}
+              <rect x="25" y="40" width="50" height="35" rx="10" fill="rgba(0,0,0,0.6)" /> {/* Front */}
+              <rect x="25" y="110" width="50" height="25" rx="5" fill="rgba(0,0,0,0.6)" /> {/* Rear */}
+              
+              {/* Side Mirrors */}
+              <rect x="5" y="45" width="10" height="5" rx="2" fill={carColor} />
+              <rect x="85" y="45" width="10" height="5" rx="2" fill={carColor} />
+              
+              {/* Lights */}
+              <circle cx="25" cy="15" r="3" fill="#FFF" className="animate-pulse" />
+              <circle cx="75" cy="15" r="3" fill="#FFF" className="animate-pulse" />
+              <rect x="20" y="165" width="10" height="3" fill="#F00" />
+              <rect x="70" y="165" width="10" height="3" fill="#F00" />
+            </svg>
+          </div>
+        </motion.div>
+      ) : (
+        <div className="flex-1 w-full border-2 border-dashed border-[var(--border)] rounded-[16px] flex items-center justify-center group-hover:border-[var(--accent)]/30 transition-colors">
+          <Plus size={16} className="text-[var(--border)] group-hover:text-[var(--accent)] transition-colors" />
+        </div>
+      )}
+    </motion.div>
   );
 };
 

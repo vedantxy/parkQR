@@ -1,268 +1,279 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Mail, Lock, Eye, EyeOff, ShieldCheck, Check, AlertCircle, Phone, KeyRound } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
+import { Mail, Lock, Eye, EyeOff, Shield, Check, AlertCircle, Phone, KeyRound, ArrowRight, Moon, Sun } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import DashboardSkeleton from '../components/DashboardSkeleton';
 
 const LoginPage = () => {
-  const [loginMode, setLoginMode] = useState('email'); // 'email' or 'otp'
-  
-  // Email/Password state
+  const { theme, toggleTheme } = useTheme();
+  const [loginMode, setLoginMode] = useState('email');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [keepLogged, setKeepLogged] = useState(true);
-  
-  // OTP state
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
-  
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [showSkeleton, setShowSkeleton] = useState(false);
+  const [statusMessage, setStatusMessage] = useState('Signing you in...');
+  
   const { login, requestOtp, loginWithOtp } = useAuth();
+
+  // Smart messaging rotation
+  useEffect(() => {
+    if (isAuthenticating) {
+      const messages = [
+        'Authenticating credentials...',
+        'Fetching your secure dashboard...',
+        'Optimizing parking analytics...',
+        'Almost ready...'
+      ];
+      let i = 0;
+      const interval = setInterval(() => {
+        i = (i + 1) % messages.length;
+        setStatusMessage(messages[i]);
+      }, 1500);
+      return () => clearInterval(interval);
+    }
+  }, [isAuthenticating]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
+    setIsAuthenticating(true);
     
-    if (loginMode === 'email') {
-      const result = await login(email, password, keepLogged);
-      if (!result.success) setError(result.message);
-    } else {
-      if (!otpSent) {
-        // Request OTP
-        const result = await requestOtp(phone);
-        if (result.success) {
-          setOtpSent(true);
-        } else {
-          setError(result.message);
-        }
+    const skeletonTimer = setTimeout(() => {
+      if (!error) setShowSkeleton(true);
+    }, 6000);
+
+    try {
+      let result;
+      if (loginMode === 'email') {
+        result = await login(email, password, keepLogged);
       } else {
-        // Verify OTP
-        const result = await loginWithOtp(phone, otp);
-        if (!result.success) setError(result.message);
+        if (!otpSent) {
+          result = await requestOtp(phone);
+          if (result.success) {
+            setOtpSent(true);
+            setIsAuthenticating(false);
+            return;
+          }
+        } else {
+          result = await loginWithOtp(phone, otp);
+        }
       }
+
+      if (result.success) {
+        setShowSkeleton(true);
+      } else {
+        setError(result.message);
+        setIsAuthenticating(false);
+        setShowSkeleton(false);
+      }
+    } catch (err) {
+      setError('Connection failed. Please try again.');
+      setIsAuthenticating(false);
+      setShowSkeleton(false);
+    } finally {
+      clearTimeout(skeletonTimer);
     }
-    
-    setLoading(false);
   };
 
+  if (showSkeleton) return <DashboardSkeleton />;
+
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-surface dot-pattern font-inter relative">
-      {/* Subtle top accent */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary-400 to-success" />
+    <div className="min-h-screen w-full flex items-center justify-center bg-[var(--bg)] font-inter relative overflow-hidden transition-colors duration-500">
+      {/* Decorative Blur Blobs */}
+      <div className="absolute top-[-10%] left-[-5%] w-[40%] h-[40%] bg-[var(--accent)] opacity-[0.05] rounded-full blur-[120px]" />
+      <div className="absolute bottom-[-10%] right-[-5%] w-[40%] h-[40%] bg-primary opacity-[0.05] rounded-full blur-[120px]" />
 
       <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.4, ease: 'easeOut' }}
-        className="w-full max-w-[420px] mx-4"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full max-w-[440px] mx-4 relative z-10"
       >
-        {/* Card */}
-        <div className="bg-white rounded-2xl shadow-card p-8 border border-border">
-          {/* Logo */}
-          <div className="flex flex-col items-center mb-8">
-            <div className="h-14 w-14 bg-primary rounded-2xl flex items-center justify-center mb-4 shadow-md shadow-primary/20">
-              <ShieldCheck className="text-white" size={28} />
-            </div>
-            <h1 className="text-2xl font-bold text-txt-primary">
-              ParkSmart <span className="text-primary">AI</span>
+        <div className="card-automotive p-10 border-[var(--border)]">
+          {/* Theme Toggle in Login */}
+          <div className="absolute top-6 right-6">
+             <button onClick={toggleTheme} className="p-2 text-[var(--txt-secondary)] hover:text-[var(--accent)] transition-colors">
+               {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+             </button>
+          </div>
+
+          {/* Logo Section */}
+          <div className="flex flex-col items-center mb-10">
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="h-16 w-16 bg-[var(--accent)] rounded-2xl flex items-center justify-center mb-5 accent-glow"
+            >
+              <Shield className={theme === 'light' ? 'text-white' : 'text-black'} size={32} />
+            </motion.div>
+            <h1 className="text-2xl font-black text-[var(--txt-primary)] tracking-tighter uppercase">
+              PARK<span className="text-[var(--accent)]">ORA</span>
             </h1>
-            <p className="text-sm text-txt-secondary mt-1">Smart Parking Management System</p>
+            <p className="text-[10px] text-[var(--txt-secondary)] mt-2 font-black uppercase tracking-[0.2em]">Enterprise Parking Intelligence</p>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            
-            {/* Mode Toggle */}
-            <div className="flex p-1 bg-surface rounded-xl mb-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="flex p-1.5 bg-[var(--bg)] rounded-2xl mb-8 border border-[var(--border)]">
               <button
                 type="button"
                 onClick={() => { setLoginMode('email'); setError(''); }}
-                className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${
-                  loginMode === 'email' ? 'bg-white text-primary shadow-sm' : 'text-txt-muted hover:text-txt-secondary'
+                className={`flex-1 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all duration-300 ${
+                  loginMode === 'email' ? 'bg-[var(--surface)] text-[var(--accent)] shadow-sm' : 'text-[var(--txt-secondary)] hover:text-[var(--txt-primary)]'
                 }`}
               >
-                Email
+                Corporate Email
               </button>
               <button
                 type="button"
                 onClick={() => { setLoginMode('otp'); setError(''); }}
-                className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${
-                  loginMode === 'otp' ? 'bg-white text-primary shadow-sm' : 'text-txt-muted hover:text-txt-secondary'
+                className={`flex-1 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all duration-300 ${
+                  loginMode === 'otp' ? 'bg-[var(--surface)] text-[var(--accent)] shadow-sm' : 'text-[var(--txt-secondary)] hover:text-[var(--txt-primary)]'
                 }`}
               >
-                Mobile OTP
+                Mobile Secure
               </button>
             </div>
 
             {loginMode === 'email' ? (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
-                {/* Email */}
-                <div>
-                  <label className="block text-sm font-medium text-txt-secondary mb-1.5">Email Address</label>
+              <div className="space-y-5">
+                <div className="group">
+                  <label className="block text-[10px] font-black text-[var(--txt-secondary)] uppercase tracking-[0.2em] mb-2 ml-1">Work Email</label>
                   <div className="relative">
-                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-txt-muted" size={18} />
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--txt-secondary)] group-focus-within:text-[var(--accent)] transition-colors" size={18} />
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="admin@parksmart.ai"
-                      className="w-full h-12 bg-surface border border-border rounded-btn pl-11 pr-4 text-sm text-txt-primary placeholder:text-txt-muted focus:ring-2 focus:ring-primary-200 focus:border-primary outline-none transition-all duration-200"
-                      required={loginMode === 'email'}
+                      className="w-full h-14 bg-[var(--bg)] border border-[var(--border)] rounded-2xl pl-12 pr-4 text-sm text-[var(--txt-primary)] placeholder:text-[var(--txt-secondary)] focus:border-[var(--accent)] outline-none transition-all duration-300"
+                      required
                     />
                   </div>
                 </div>
 
-                {/* Password */}
-                <div>
-                  <label className="block text-sm font-medium text-txt-secondary mb-1.5">Password</label>
+                <div className="group">
+                  <label className="block text-[10px] font-black text-[var(--txt-secondary)] uppercase tracking-[0.2em] mb-2 ml-1">Password</label>
                   <div className="relative">
-                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-txt-muted" size={18} />
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--txt-secondary)] group-focus-within:text-[var(--accent)] transition-colors" size={18} />
                     <input
                       type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full h-12 bg-surface border border-border rounded-btn pl-11 pr-12 text-sm text-txt-primary placeholder:text-txt-muted focus:ring-2 focus:ring-primary-200 focus:border-primary outline-none transition-all duration-200"
-                      required={loginMode === 'email'}
+                      className="w-full h-14 bg-[var(--bg)] border border-[var(--border)] rounded-2xl pl-12 pr-12 text-sm text-[var(--txt-primary)] placeholder:text-[var(--txt-secondary)] focus:border-[var(--accent)] outline-none transition-all duration-300"
+                      required
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-txt-muted hover:text-txt-secondary transition-colors"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--txt-secondary)] hover:text-[var(--txt-primary)] transition-colors p-1"
                     >
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             ) : (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
-                {/* Phone */}
-                <div>
-                  <label className="block text-sm font-medium text-txt-secondary mb-1.5">Mobile Number</label>
+              <div className="space-y-5">
+                <div className="group">
+                  <label className="block text-[10px] font-black text-[var(--txt-secondary)] uppercase tracking-[0.2em] mb-2 ml-1">Phone Number</label>
                   <div className="relative">
-                    <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-txt-muted" size={18} />
+                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--txt-secondary)] group-focus-within:text-[var(--accent)] transition-colors" size={18} />
                     <input
                       type="tel"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      placeholder="9876543210"
+                      placeholder="+91 98765 43210"
                       disabled={otpSent}
-                      className="w-full h-12 bg-surface border border-border rounded-btn pl-11 pr-4 text-sm text-txt-primary placeholder:text-txt-muted focus:ring-2 focus:ring-primary-200 focus:border-primary outline-none transition-all duration-200 disabled:opacity-60"
-                      required={loginMode === 'otp'}
+                      className="w-full h-14 bg-[var(--bg)] border border-[var(--border)] rounded-2xl pl-12 pr-4 text-sm text-[var(--txt-primary)] placeholder:text-[var(--txt-secondary)] focus:border-[var(--accent)] outline-none transition-all duration-300 disabled:opacity-60"
+                      required
                     />
                   </div>
                 </div>
 
-                {/* OTP Input */}
                 <AnimatePresence>
                   {otpSent && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
-                      <label className="block text-sm font-medium text-txt-secondary mb-1.5 mt-5">Enter OTP</label>
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="pt-2">
+                      <label className="block text-[10px] font-black text-[var(--txt-secondary)] uppercase tracking-[0.2em] mb-2 ml-1">Verification Code</label>
                       <div className="relative">
-                        <KeyRound className="absolute left-3.5 top-1/2 -translate-y-1/2 text-txt-muted" size={18} />
+                        <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--txt-secondary)]" size={18} />
                         <input
                           type="text"
                           value={otp}
                           onChange={(e) => setOtp(e.target.value)}
                           placeholder="123456"
-                          className="w-full h-12 bg-surface border border-border rounded-btn pl-11 pr-4 text-sm text-txt-primary placeholder:text-txt-muted focus:ring-2 focus:ring-primary-200 focus:border-primary outline-none transition-all duration-200 tracking-widest font-mono"
-                          required={loginMode === 'otp' && otpSent}
+                          className="w-full h-14 bg-[var(--bg)] border border-[var(--border)] rounded-2xl pl-12 pr-4 text-sm text-[var(--txt-primary)] placeholder:text-[var(--txt-secondary)] focus:border-[var(--accent)] outline-none transition-all duration-300 tracking-[0.5em] font-mono font-bold text-center"
+                          required
                         />
                       </div>
-                      <p className="text-xs text-txt-muted mt-2">Demo OTP is 123456</p>
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </motion.div>
-            )}
-
-            {/* Keep logged in + Forgot */}
-            {loginMode === 'email' && (
-              <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2.5 cursor-pointer group">
-                  <div
-                    className={`w-[18px] h-[18px] rounded flex items-center justify-center transition-colors duration-200
-                      ${keepLogged ? 'bg-primary' : 'bg-white border-2 border-border group-hover:border-primary-300'}`}
-                  >
-                    {keepLogged && <Check size={12} className="text-white" strokeWidth={3} />}
-                  </div>
-                  <span className="text-sm text-txt-secondary group-hover:text-txt-primary transition-colors">
-                    Keep me signed in
-                  </span>
-                  <input
-                    type="checkbox"
-                    className="hidden"
-                    checked={keepLogged}
-                    onChange={() => setKeepLogged(!keepLogged)}
-                  />
-                </label>
-                <a href="#" className="text-sm font-medium text-primary hover:text-primary-600 transition-colors">
-                  Forgot?
-                </a>
               </div>
             )}
 
-            {/* Error */}
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                className="p-3 bg-danger-50 border border-danger-100 rounded-btn flex items-start gap-2.5"
-              >
-                <AlertCircle size={16} className="text-danger mt-0.5 flex-shrink-0" />
-                <p className="text-sm text-danger font-medium">{error}</p>
-              </motion.div>
-            )}
+            <div className="flex items-center justify-between px-1">
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <div className={`w-5 h-5 rounded-lg flex items-center justify-center transition-all duration-300 ${keepLogged ? 'bg-[var(--accent)] accent-glow scale-110' : 'bg-[var(--bg)] border-2 border-[var(--border)]'}`}>
+                  {keepLogged && <Check size={14} className={theme === 'light' ? 'text-white' : 'text-black'} strokeWidth={4} />}
+                </div>
+                <span className="text-[10px] font-black text-[var(--txt-secondary)] group-hover:text-[var(--txt-primary)] transition-colors uppercase tracking-tight">Remember Device</span>
+                <input type="checkbox" className="hidden" checked={keepLogged} onChange={() => setKeepLogged(!keepLogged)} />
+              </label>
+              <a href="#" className="text-[10px] font-black text-[var(--accent)] hover:underline uppercase tracking-tight">Help?</a>
+            </div>
 
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full h-12 bg-primary hover:bg-primary-600 text-white font-semibold text-sm rounded-btn transition-all duration-200 flex items-center justify-center shadow-sm hover:shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {loading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : loginMode === 'otp' && !otpSent ? (
-                'Send OTP'
-              ) : loginMode === 'otp' && otpSent ? (
-                'Verify & Sign In'
-              ) : (
-                'Sign In'
+            <AnimatePresence>
+              {error && (
+                <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="p-4 bg-danger/10 border border-danger/20 rounded-2xl flex items-center gap-3 text-danger">
+                  <AlertCircle size={18} className="shrink-0" />
+                  <p className="text-xs font-bold tracking-tight">{error}</p>
+                </motion.div>
               )}
-            </button>
+            </AnimatePresence>
+
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              type="submit"
+              disabled={isAuthenticating}
+              className="w-full h-14 bg-[var(--accent)] text-black font-black text-xs rounded-2xl transition-all duration-300 flex items-center justify-center gap-3 shadow-lg shadow-[var(--accent)]/20 disabled:opacity-80 disabled:cursor-wait relative overflow-hidden group uppercase tracking-[0.2em]"
+            >
+              {isAuthenticating ? (
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 border-3 border-black/30 border-t-black rounded-full animate-spin" />
+                  <span className="tracking-wide">{statusMessage}</span>
+                </div>
+              ) : (
+                <>
+                  <span>
+                    {loginMode === 'otp' && !otpSent ? 'Get Access' : 'Enter Dashboard'}
+                  </span>
+                  <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
+            </motion.button>
           </form>
 
-          {/* Divider */}
-          <div className="flex items-center gap-3 my-6">
-            <div className="flex-1 h-px bg-border" />
-            <span className="text-xs text-txt-muted font-medium">Quick Access</span>
-            <div className="flex-1 h-px bg-border" />
-          </div>
-
-          {/* Role hint */}
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              onClick={() => { setEmail('admin@parksmart.ai'); }}
-              className="py-2.5 border border-border rounded-btn text-sm font-medium text-txt-secondary hover:bg-primary-50 hover:text-primary hover:border-primary-200 transition-all duration-200"
-            >
-              Admin Login
-            </button>
-            <button
-              onClick={() => { setEmail('guard@parksmart.ai'); }}
-              className="py-2.5 border border-border rounded-btn text-sm font-medium text-txt-secondary hover:bg-success-50 hover:text-success hover:border-success/30 transition-all duration-200"
-            >
-              Guard Login
-            </button>
+          {/* Quick Roles */}
+          <div className="mt-10 pt-8 border-t border-[var(--border)]">
+            <p className="text-[9px] font-black text-[var(--txt-secondary)] text-center uppercase tracking-[0.3em] mb-5">Enterprise Quick Login</p>
+            <div className="grid grid-cols-2 gap-4">
+              <button onClick={() => setEmail('admin@parksmart.ai')} className="h-11 border border-[var(--border)] rounded-xl text-[10px] font-black text-[var(--txt-secondary)] hover:bg-[var(--surface)] hover:text-[var(--accent)] hover:border-[var(--accent)] transition-all uppercase tracking-widest">Sys Admin</button>
+              <button onClick={() => setEmail('guard@parksmart.ai')} className="h-11 border border-[var(--border)] rounded-xl text-[10px] font-black text-[var(--txt-secondary)] hover:bg-[var(--surface)] hover:text-[var(--accent)] hover:border-[var(--accent)] transition-all uppercase tracking-widest">Security</button>
+            </div>
           </div>
         </div>
 
-        {/* Footer */}
-        <p className="text-center text-xs text-txt-muted mt-6">
-          © 2026 ParkSmart AI · Secured by Firebase
+        <p className="text-center text-[9px] font-black text-[var(--txt-secondary)] mt-8 uppercase tracking-[0.4em] opacity-40">
+          Neural Systems © 2026 · PARKORA
         </p>
       </motion.div>
     </div>
