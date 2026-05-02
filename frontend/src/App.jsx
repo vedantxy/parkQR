@@ -10,7 +10,7 @@ import NeuralLoader from './components/NeuralLoader';
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const AdminPanel = lazy(() => import('./pages/AdminPanel'));
 const BookingPage = lazy(() => import('./pages/BookingPage'));
-const VisitorEntry = lazy(() => import('./pages/VisitorEntry'));
+const VisitorManagement = lazy(() => import('./pages/VisitorManagement'));
 const GuardScanner = lazy(() => import('./pages/GuardScanner'));
 const AnalyticsDashboard = lazy(() => import('./pages/AnalyticsDashboard'));
 const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
@@ -48,7 +48,7 @@ const AppContent = () => {
     switch (activeTab) {
       case 'dashboard': return <AdminPanel />;
       case 'booking': return <BookingPage />;
-      case 'visitors': return <VisitorEntry />;
+      case 'visitors': return <VisitorManagement />;
       case 'scanner': return <GuardScanner />;
       case 'analytics': return <AnalyticsDashboard />;
       case 'notifications': return <NotificationsPage />;
