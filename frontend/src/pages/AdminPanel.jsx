@@ -58,7 +58,10 @@ const AdminPanel = () => {
           setStats(s);
         }
       } catch (e) {
-        if (mounted) console.error("Dashboard fetch failed");
+        if (mounted) {
+          console.error("Dashboard fetch failed:", e);
+          toast.error("Analytics sync interrupted");
+        }
       } finally {
         if (mounted) setLoading(false);
       }

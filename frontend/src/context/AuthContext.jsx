@@ -67,7 +67,7 @@ export const AuthProvider = ({ children }) => {
           
           const profilePromise = getDoc(docRef);
           const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('timeout')), 2000)
+            setTimeout(() => reject(new Error('timeout')), 5000)
           );
 
           let docSnap;
