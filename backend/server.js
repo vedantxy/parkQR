@@ -47,6 +47,17 @@ io.on('connection', (socket) => {
 });
 
 // Routes
+// Professional API Versioning (v1)
+const v1Prefix = '/api/v1';
+app.use(`${v1Prefix}/users`, require('./routes/userRoutes'));
+app.use(`${v1Prefix}/visitors`, require('./routes/visitorRoutes'));
+app.use(`${v1Prefix}/parking`, require('./routes/parkingRoutes'));
+app.use(`${v1Prefix}/qr`, require('./routes/qrRoutes'));
+app.use(`${v1Prefix}/notifications`, require('./routes/notificationRoutes'));
+app.use(`${v1Prefix}/analytics`, require('./routes/analyticsRoutes'));
+app.use(`${v1Prefix}/ai`, require('./routes/aiRoutes'));
+
+// Legacy Support (Backward Compatibility)
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/visitors', require('./routes/visitorRoutes'));
 app.use('/api/parking', require('./routes/parkingRoutes'));

@@ -96,4 +96,75 @@ const assignSmartSlot = async (req, res) => {
     }
 };
 
-module.exports = { getSlots, assignSmartSlot };
+/**
+ * @desc    Manual release of a parking slot
+ * @route   POST /api/parking/release/:slotId
+ */
+const releaseSlot = async (req, res) => {
+    try {
+        const { slotId } = req.params;
+        
+        if (isDBConnected()) {
+            const slot = await ParkingSlot.findOne({ slotId });
+            if (!slot) return res.status(404).json({ success: false, message: 'Slot not found' });
+            
+            slot.isOccupied = false;
+            slot.vehicle = null;
+            slot.startTime = null;
+            slot.visitorId = null;
+            await slot.save();
+            
+            await syncSlotToFirestore(slot);
+            
+            // Emit Socket event for real-time UI updates
+            const io = req.app.get('socketio');
+            if (io) io.emit('slot-update', slot);
+
+            return res.status(200).json({ success: true, message: `Slot ${slotId} released`, data: slot });
+        }
+
+        // Mock fallback
+        const mockSlot = mockStore.slots.find(s => s.slotId === slotId);
+        if (mockSlot) {
+            mockSlot.isOccupied = false;
+            return res.status(200).json({ success: true, message: `Mock Slot ${slotId} released` });
+        }
+        
+    } catch (err) {
+        res.status(500).json({ success: false, message: 'Failed to release slot' });
+    }
+};
+
+/**
+ * @desc    Emergency status override (Admin only)
+ * @route   PATCH /api/parking/status/:slotId
+ */
+const updateSlotStatus = async (req, res) => {
+    try {
+        const { slotId } = req.params;
+        const { isOccupied, slotType, vehicle } = req.body;
+
+        if (isDBConnected()) {
+            const slot = await ParkingSlot.findOneAndUpdate(
+                { slotId },
+                { isOccupied, slotType, vehicle, startTime: isOccupied ? new Date() : null },
+                { new: true }
+            );
+            
+            if (!slot) return res.status(404).json({ success: false, message: 'Slot not found' });
+            
+            await syncSlotToFirestore(slot);
+            
+            const io = req.app.get('socketio');
+            if (io) io.emit('slot-update', slot);
+
+            return res.status(200).json({ success: true, message: 'Override applied', data: slot });
+        }
+        
+        return res.status(503).json({ success: false, message: 'DB required for override' });
+    } catch (err) {
+        res.status(500).json({ success: false, message: 'Override failed' });
+    }
+};
+
+module.exports = { getSlots, assignSmartSlot, releaseSlot, updateSlotStatus };
