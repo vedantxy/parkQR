@@ -80,7 +80,7 @@ const AppLayout = ({ children, activeTab, setActiveTab, notificationCount = 3 })
             </button>
 
             <h1 className="text-xl font-black tracking-tighter text-[var(--txt-primary)] uppercase">
-              PARK<span className="text-[var(--accent)]">ORA</span>
+              PARK<span className="text-[var(--accent)]">SMART</span>
             </h1>
 
             <div className="relative hidden xl:block">
@@ -175,7 +175,7 @@ const AppLayout = ({ children, activeTab, setActiveTab, notificationCount = 3 })
             >
               <div className="flex items-center justify-between mb-12">
                 <h1 className="text-xl font-black tracking-tighter text-[var(--txt-primary)] uppercase">
-                  PARK<span className="text-[var(--accent)]">ORA</span>
+                  PARK<span className="text-[var(--accent)]">SMART</span>
                 </h1>
                 <button onClick={() => setMobileMenuOpen(false)} className="p-2 text-[var(--txt-secondary)]">
                   <X size={24} />

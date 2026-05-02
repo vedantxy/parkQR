@@ -32,60 +32,22 @@ const mockNotifications = [
   },
 ];
 
-import API_URL from '../apiConfig';
-import DashboardSkeleton from '../components/DashboardSkeleton';
-
 const NotificationsPage = () => {
-  const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [notifications, setNotifications] = useState(mockNotifications);
   const [filterType, setFilterType] = useState('all');
-
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        setLoading(true);
-        const token = localStorage.getItem('parksmart_token');
-        const res = await fetch(`${API_URL}/api/v1/notifications`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const result = await res.json();
-        
-        // Map backend data to UI format
-        const mapped = (result.data || []).map(n => ({
-          id: n._id,
-          type: n.type.toLowerCase(),
-          read: n.isRead,
-          title: n.type === 'OVERSTAY' ? 'DURATION BREACH' : n.type === 'ENTRY' ? 'VISITOR AUTHENTICATED' : 'VISITOR DEPARTURE',
-          message: n.message,
-          time: new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          timestamp: new Date(n.createdAt).getTime()
-        }));
-        
-        setNotifications(mapped);
-      } catch (err) {
-        console.error('Failed to load alerts:', err);
-      } finally {
-        setTimeout(() => setLoading(false), 800);
-      }
-    };
-    fetchNotifications();
-  }, []);
-
-  if (loading) return <DashboardSkeleton />;
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  const markAsRead = async (id) => {
-    try {
-      const token = localStorage.getItem('parksmart_token');
-      await fetch(`${API_URL}/api/v1/notifications/${id}`, {
-        method: 'PUT',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
-    } catch (err) {
-      console.error('Failed to mark read:', err);
-    }
+  const markAsRead = (id) => {
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+  };
+
+  const markAllRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  };
+
+  const deleteNotification = (id) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
   };
 
   const typeConfig = {

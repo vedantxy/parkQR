@@ -9,24 +9,6 @@ const { sendEntryAlert } = require('../utils/smsService');
 const { isDBConnected, mockStore } = require('../utils/mockData');
 
 /**
- * @desc    Get visitors for a specific flat (Resident View)
- * @route   GET /api/visitors/flat/:flatNumber
- */
-exports.getVisitorsByFlat = async (req, res) => {
-    try {
-        const { flatNumber } = req.params;
-        if (isDBConnected()) {
-            const visitors = await Visitor.find({ flatNumber }).sort({ createdAt: -1 });
-            return res.status(200).json({ success: true, count: visitors.length, data: visitors });
-        }
-        const visitors = mockStore.visitors.filter(v => v.flatNumber === flatNumber);
-        res.status(200).json({ success: true, count: visitors.length, data: visitors, isMock: true });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Server Error' });
-    }
-};
-
-/**
  * @desc    Get all visitors
  * @route   GET /api/visitors
  */

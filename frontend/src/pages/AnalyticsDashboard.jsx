@@ -35,42 +35,14 @@ const hourlyData = [
   { hour: '21:00', visitors: 8 },
 ];
 
-import API_URL from '../apiConfig';
-import DashboardSkeleton from '../components/DashboardSkeleton';
-
 const AnalyticsDashboard = () => {
   const [dateRange, setDateRange] = useState('week');
-  const [loading, setLoading] = useState(true);
-  const [data, setData] = useState(null);
-
-  useEffect(() => {
-    const fetchAnalytics = async () => {
-      try {
-        setLoading(true);
-        const token = localStorage.getItem('parksmart_token');
-        
-        // Fetch full analytics
-        const res = await fetch(`${API_URL}/api/v1/analytics/dashboard`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const result = await res.json();
-        setData(result.data);
-      } catch (err) {
-        console.error('Analytics load failed:', err);
-      } finally {
-        setTimeout(() => setLoading(false), 800);
-      }
-    };
-    fetchAnalytics();
-  }, []);
-
-  if (loading) return <DashboardSkeleton />;
 
   const kpis = [
-    { label: 'TOTAL ENTRIES', value: data?.kpis?.totalVisitorsToday || '0', change: '+12.5%', up: true, icon: Users, color: 'var(--accent)' },
-    { label: 'REVENUE TODAY', value: `$${data?.kpis?.revenue?.today || 0}`, change: data?.kpis?.revenue?.growth || '+0%', up: true, icon: TrendingUp, color: '#10B981' },
-    { label: 'PEAK TRAFFIC', value: data?.kpis?.peakHour || '--', change: 'Live', up: true, icon: Zap, color: '#F59E0B' },
-    { label: 'OCCUPANCY', value: `${data?.occupancy?.prediction || 0}%`, change: '-1.8%', up: false, icon: BarChart3, color: '#EF4444' },
+    { label: 'TOTAL ENTRIES', value: '1,247', change: '+12.5%', up: true, icon: Users, color: 'var(--accent)' },
+    { label: 'AVG DURATION', value: '47 MIN', change: '-8%', up: false, icon: Clock, color: '#10B981' },
+    { label: 'PEAK TRAFFIC', value: '18:00', change: '55 UNIT', up: true, icon: Zap, color: '#F59E0B' },
+    { label: 'BREACH RATE', value: '4.2%', change: '-1.8%', up: false, icon: TrendingUp, color: '#EF4444' },
   ];
 
   return (
@@ -140,24 +112,24 @@ const AnalyticsDashboard = () => {
               <span className="text-[9px] font-black text-[var(--txt-secondary)] opacity-40 uppercase tracking-widest">Real-time Stream</span>
            </div>
 
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={data?.dailyStats || []}>
-                <defs>
-                  <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="var(--accent)" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} opacity={0.3} />
-                <XAxis dataKey="_id" tick={{ fontSize: 10, fontWeight: 900, fill: 'var(--txt-secondary)' }} axisLine={false} tickLine={false} dy={10} />
-                <YAxis tick={{ fontSize: 10, fontWeight: 900, fill: 'var(--txt-secondary)' }} axisLine={false} tickLine={false} />
-                <Tooltip 
-                  contentStyle={{ background: 'rgba(15, 23, 42, 0.9)', backdropFilter: 'blur(10px)', border: '1px solid var(--border)', borderRadius: '16px', color: '#fff' }}
-                  itemStyle={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase' }}
-                />
-                <Area type="monotone" dataKey="count" stroke="var(--accent)" strokeWidth={4} fill="url(#areaGrad)" />
-              </AreaChart>
-            </ResponsiveContainer>
+           <ResponsiveContainer width="100%" height={300}>
+             <AreaChart data={visitorsPerDay}>
+               <defs>
+                 <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                   <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.2} />
+                   <stop offset="95%" stopColor="var(--accent)" stopOpacity={0} />
+                 </linearGradient>
+               </defs>
+               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} opacity={0.3} />
+               <XAxis dataKey="date" tick={{ fontSize: 10, fontWeight: 900, fill: 'var(--txt-secondary)' }} axisLine={false} tickLine={false} dy={10} />
+               <YAxis tick={{ fontSize: 10, fontWeight: 900, fill: 'var(--txt-secondary)' }} axisLine={false} tickLine={false} />
+               <Tooltip 
+                 contentStyle={{ background: 'rgba(15, 23, 42, 0.9)', backdropFilter: 'blur(10px)', border: '1px solid var(--border)', borderRadius: '16px', color: '#fff' }}
+                 itemStyle={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase' }}
+               />
+               <Area type="monotone" dataKey="visitors" stroke="var(--accent)" strokeWidth={4} fill="url(#areaGrad)" />
+             </AreaChart>
+           </ResponsiveContainer>
         </div>
 
         {/* Gate Distribution */}
@@ -229,13 +201,13 @@ const AnalyticsDashboard = () => {
               <h3 className="text-sm font-black text-[var(--txt-primary)] uppercase tracking-widest">Current Load</h3>
            </div>
            
-            <div className="relative">
+           <div className="relative">
               <ResponsiveContainer width={240} height={240}>
                 <RadialBarChart
                   cx="50%" cy="50%"
                   innerRadius="80%" outerRadius="100%"
                   barSize={12}
-                  data={[{ name: 'Usage', value: data?.occupancy?.prediction || 0, fill: 'var(--accent)' }]}
+                  data={[{ name: 'Usage', value: 72, fill: 'var(--accent)' }]}
                   startAngle={90} endAngle={-270}
                 >
                   <RadialBar
@@ -246,21 +218,21 @@ const AnalyticsDashboard = () => {
                 </RadialBarChart>
               </ResponsiveContainer>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                 <p className="text-6xl font-black text-[var(--txt-primary)] tracking-tighter">{data?.occupancy?.prediction || 0}<span className="text-xl">%</span></p>
+                 <p className="text-6xl font-black text-[var(--txt-primary)] tracking-tighter">72<span className="text-xl">%</span></p>
                  <p className="text-[10px] font-black text-[var(--txt-secondary)] uppercase tracking-[0.3em] mt-2">Occupied</p>
               </div>
-            </div>
-            
-            <div className="mt-8 flex gap-8">
+           </div>
+           
+           <div className="mt-8 flex gap-8">
               <div className="text-center">
-                 <p className="text-lg font-black text-[var(--txt-primary)]">{data?.occupancy?.occupied || 0}</p>
+                 <p className="text-lg font-black text-[var(--txt-primary)]">234</p>
                  <p className="text-[9px] font-black text-success uppercase tracking-widest">Active Slots</p>
               </div>
               <div className="text-center border-l border-[var(--border)] pl-8">
-                 <p className="text-lg font-black text-[var(--txt-primary)]">{data?.occupancy?.free || 0}</p>
-                 <p className="text-[9px] font-black text-danger uppercase tracking-widest">Free Slots</p>
+                 <p className="text-lg font-black text-[var(--txt-primary)]">12</p>
+                 <p className="text-[9px] font-black text-danger uppercase tracking-widest">Breach Alerts</p>
               </div>
-            </div>
+           </div>
         </div>
 
       </div>

@@ -2,10 +2,6 @@ const Visitor = require('../models/Visitor');
 const ParkingSlot = require('../models/ParkingSlot');
 const Notification = require('../models/Notification');
 const { isDBConnected, mockStore } = require('../utils/mockData');
-const NodeCache = require('node-cache');
-
-// Cache analytics for 5 minutes to boost performance
-const analyticsCache = new NodeCache({ stdTTL: 300 });
 
 /**
  * @desc    Get dashboard analytics aggregation
@@ -13,16 +9,6 @@ const analyticsCache = new NodeCache({ stdTTL: 300 });
  */
 exports.getDashboardStats = async (req, res) => {
     try {
-        const cacheKey = 'dashboard_stats';
-        const cachedData = analyticsCache.get(cacheKey);
-
-        if (cachedData && isDBConnected()) {
-            return res.status(200).json({
-                success: true,
-                data: cachedData,
-                cached: true
-            });
-        }
         if (isDBConnected()) {
             const sevenDaysAgo = new Date();
             sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -60,30 +46,25 @@ exports.getDashboardStats = async (req, res) => {
                 growth: "+14.5%"
             };
 
-            const responseData = {
-                dailyStats,
-                occupancy: {
-                    total: totalSlots,
-                    occupied: occupiedSlots,
-                    free: totalSlots - occupiedSlots,
-                    prediction: predictedLoad
-                },
-                timeline,
-                kpis: {
-                    totalVisitorsToday: await Visitor.countDocuments({
-                        createdAt: { $gte: new Date().setHours(0,0,0,0) }
-                    }),
-                    peakHour: peakHoursData.length > 0 ? peakHoursData.sort((a,b) => b.count - a.count)[0]._id : '--',
-                    revenue: revenueStats
-                }
-            };
-
-            // Store in cache
-            analyticsCache.set(cacheKey, responseData);
-
             return res.status(200).json({
                 success: true,
-                data: responseData
+                data: {
+                    dailyStats,
+                    occupancy: {
+                        total: totalSlots,
+                        occupied: occupiedSlots,
+                        free: totalSlots - occupiedSlots,
+                        prediction: predictedLoad // AI Predicted Occupancy %
+                    },
+                    timeline,
+                    kpis: {
+                        totalVisitorsToday: await Visitor.countDocuments({
+                            createdAt: { $gte: new Date().setHours(0,0,0,0) }
+                        }),
+                        peakHour: peakHoursData.length > 0 ? peakHoursData.sort((a,b) => b.count - a.count)[0]._id : '--',
+                        revenue: revenueStats
+                    }
+                }
             });
         }
 

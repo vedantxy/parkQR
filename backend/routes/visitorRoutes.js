@@ -19,8 +19,5 @@ router.get('/', protect, getVisitors);
 // @route   GET /api/visitors/:id
 router.get('/:id', protect, getVisitorById);
 
-// @route   GET /api/visitors/flat/:flatNumber
-router.get('/flat/:flatNumber', protect, require('../controllers/visitorController').getVisitorsByFlat);
-
 
 module.exports = router;

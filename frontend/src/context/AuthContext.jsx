@@ -24,7 +24,9 @@ export const AuthProvider = ({ children }) => {
   });
 
   // If user exists in cache, we don't need to show the initial loader
-  const [initialLoading, setInitialLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(() => {
+    return !localStorage.getItem('parksmart_user');
+  });
   const [authActionLoading, setAuthActionLoading] = useState(false);
 
   /**
@@ -46,17 +48,27 @@ export const AuthProvider = ({ children }) => {
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
+        // 2. Early Loading Clear: If we have cached data for this user, show it instantly
+        const cachedUserStr = localStorage.getItem('parksmart_user');
+        if (cachedUserStr) {
+          try {
+            const cachedUser = JSON.parse(cachedUserStr);
+            if (cachedUser.uid === firebaseUser.uid) {
+              setUser(cachedUser);
+              setInitialLoading(false);
+              clearTimeout(timeoutId);
+            }
+          } catch (e) { /* ignore parse error */ }
+        }
+
         try {
-          const token = await firebaseUser.getIdToken();
-          localStorage.setItem('parksmart_token', token);
-          
           const docRef = doc(db, "users", firebaseUser.uid);
           const docSnap = await getDoc(docRef);
 
           const userData = {
             uid: firebaseUser.uid,
             email: firebaseUser.email,
-            token,
+            token: await firebaseUser.getIdToken(),
             role: docSnap.exists() ? docSnap.data().role : (firebaseUser.email.includes('admin') ? 'admin' : 'guard'),
             name: docSnap.exists() ? docSnap.data().name : (firebaseUser.displayName || firebaseUser.email.split('@')[0]),
           };
@@ -64,10 +76,22 @@ export const AuthProvider = ({ children }) => {
           localStorage.setItem('parksmart_user', JSON.stringify(userData));
           setUser(userData);
         } catch (err) {
-          console.error("Auth sync error:", err);
+          // Graceful handling for offline or network issues
+          if (err.code === 'unavailable' || !navigator.onLine) {
+            const fallbackData = {
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              role: firebaseUser.email.includes('admin') ? 'admin' : 'guard',
+              name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
+              isOffline: true
+            };
+            setUser(fallbackData);
+          } else {
+            console.error("Auth sync error:", err);
+          }
         }
       } else {
-        // Only clear if no token in localStorage
+        // Only clear if we don't have a custom backend token
         if (!localStorage.getItem('parksmart_token')) {
           clearSession();
         }
