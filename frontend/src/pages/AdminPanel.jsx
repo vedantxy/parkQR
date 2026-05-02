@@ -40,6 +40,7 @@ const AdminPanel = () => {
   ];
 
   useEffect(() => {
+    let mounted = true;
     const fetchDashboard = async () => {
       if (!user?.token) return;
       try {
@@ -47,7 +48,7 @@ const AdminPanel = () => {
           headers: { 'Authorization': `Bearer ${user.token}` }
         });
         const data = await res.json();
-        if (data.success) {
+        if (data.success && mounted) {
           const s = [
             { label: 'Active Visitors', value: data.data.summary.totalInside, growth: '+12%', isUp: true },
             { label: 'Today Arrivals', value: data.data.summary.totalToday, growth: '+3%', isUp: true },
@@ -57,12 +58,13 @@ const AdminPanel = () => {
           setStats(s);
         }
       } catch (e) {
-        console.error("Dashboard fetch failed");
+        if (mounted) console.error("Dashboard fetch failed");
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     };
     fetchDashboard();
+    return () => { mounted = false; };
   }, [user?.token]);
 
   if (loading) return <div className="p-20 text-center animate-pulse uppercase font-black tracking-widest opacity-40">Syncing Intelligence...</div>;
