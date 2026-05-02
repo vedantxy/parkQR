@@ -1,11 +1,36 @@
+<<<<<<< HEAD
 # 🅿️ ParkSmart AI — Enterprise-Grade Smart Parking & Visitor Management
+=======
+>>>>>>> f4185f330b23c11c82941fc2158f2bc048bfdb3c
 
 ParkSmart AI is a production-ready, SaaS-level platform for residential societies, corporate campuses, and smart cities. It combines **real-time WebSocket automation**, **Firebase authentication**, **AI-powered parking allocation**, and **advanced analytics** into a single, premium dashboard experience.
 
+<<<<<<< HEAD
 ![Status](https://img.shields.io/badge/Status-Production--Ready-success)
 ![Stack](https://img.shields.io/badge/Stack-React%20+%20Express%20+%20MongoDB%20+%20Firebase-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Theme](https://img.shields.io/badge/Theme-Premium%20Light%20UI-white)
+=======
+<p align="center">
+  <strong>The Future of Autonomous Parking & Enterprise Visitor Management</strong>
+</p>
+
+<p align="center">
+  <a href="https://www.figma.com/proto/KxdacndljNmlOhHl1HTTVM/Untitled?page-id=392%3A2&node-id=398-1773&p=f&viewport=604%2C289%2C0.1&t=HXsAZWVVL4Ppeoch-1&scaling=min-zoom&content-scaling=fixed&starting-point-node-id=398%3A1773"><strong>🎨 Figma Design</strong></a> ·
+  <a href="https://parksmart-pro.vercel.app"><strong>🌐 Live Frontend</strong></a> ·
+  <a href="https://parksmart-api.render.com"><strong>⚙️ Backend API</strong></a> ·
+  <a href="https://documenter.getpostman.com/view/50839131/2sBXqKofA7"><strong>📄 Postman Docs</strong></a> ·
+  <a href="https://youtube.com/demo-link"><strong>📺 YouTube Demo</strong></a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/MERN-Stack-AD0000?style=for-the-badge&logo=mongodb" alt="MERN" />
+  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind" />
+  <img src="https://img.shields.io/badge/Socket.io-010101?style=for-the-badge&logo=socket.io&logoColor=white" alt="Socket.io" />
+  <img src="https://img.shields.io/badge/Google_Gemini-8E75B2?style=for-the-badge&logo=google-gemini&logoColor=white" alt="AI" />
+</p>
+>>>>>>> f4185f330b23c11c82941fc2158f2bc048bfdb3c
 
 ---
 
