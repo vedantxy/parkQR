@@ -3,7 +3,7 @@ import { listenToAvailableSlots } from '../services/bookingService';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ParkingSquare, Car, Clock, AlertTriangle, Filter,
-  X, User, Phone, Home, Timer, MapPin, ChevronRight, Activity, Layers
+  X, User, Phone, Home, Timer, MapPin, ChevronRight, Activity, Layers, ShieldCheck
 } from 'lucide-react';
 import ParkingMap from '../components/ParkingMap';
 
