@@ -39,6 +39,13 @@ exports.getDashboardStats = async (req, res) => {
                 .limit(10)
                 .select('message type createdAt');
 
+            // 4. Revenue Insights (Simulated based on stay duration)
+            const revenueStats = {
+                today: Math.round((occupiedSlots * 50) + (Math.random() * 200)), // Base charge 50
+                monthly: 12450,
+                growth: "+14.5%"
+            };
+
             return res.status(200).json({
                 success: true,
                 data: {
@@ -54,7 +61,8 @@ exports.getDashboardStats = async (req, res) => {
                         totalVisitorsToday: await Visitor.countDocuments({
                             createdAt: { $gte: new Date().setHours(0,0,0,0) }
                         }),
-                        peakHour: peakHoursData.length > 0 ? peakHoursData.sort((a,b) => b.count - a.count)[0]._id : '--'
+                        peakHour: peakHoursData.length > 0 ? peakHoursData.sort((a,b) => b.count - a.count)[0]._id : '--',
+                        revenue: revenueStats
                     }
                 }
             });

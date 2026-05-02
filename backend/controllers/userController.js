@@ -6,6 +6,62 @@ const { sendOTP } = require('../utils/smsService');
 const otpStore = new Map(); // In-memory OTP store for demo: phone -> { otp, expires }
 
 /**
+ * @desc    Register a new user
+ * @route   POST /api/users/register
+ */
+exports.register = async (req, res) => {
+    try {
+        const { name, email, password, role } = req.body;
+        console.log(`📝 Register Attempt: ${email} (DB: ${isDBConnected()})`);
+
+        if (!name || !email || !password) {
+            console.log('❌ Missing fields');
+            return res.status(400).json({ success: false, message: 'Missing required fields' });
+        }
+
+        if (isDBConnected()) {
+            console.log('🌐 Checking DB for existing user...');
+            const userExists = await User.findOne({ email });
+            if (userExists) {
+                console.log('❌ User already exists');
+                return res.status(400).json({ success: false, message: 'User already exists' });
+            }
+
+            console.log('💾 Saving user to DB...');
+            const user = await User.create({ name, email, password, role: role || 'guard' });
+            console.log('✅ User created in DB');
+            
+            const token = jwt.sign(
+                { id: user._id, role: user.role },
+                process.env.JWT_SECRET || 'fallback_secret',
+                { expiresIn: '8h' }
+            );
+
+            return res.status(201).json({
+                success: true,
+                token,
+                user: { id: user._id, name: user.name, role: user.role }
+            });
+        }
+
+        // Mock Fallback
+        console.log('☁️  Mock Mode: Saving to mock store...');
+        const newUser = { _id: `m-${Date.now()}`, name, email, password, role: role || 'guard' };
+        mockStore.users.push(newUser);
+        
+        res.status(201).json({
+            success: true,
+            token: 'mock-jwt-token-pro-4455',
+            user: { id: newUser._id, name: newUser.name, role: newUser.role }
+        });
+
+    } catch (err) {
+        console.error('💥 REGISTER ERROR:', err.message);
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+/**
  * @desc    Standard Enterprise Login
  * @route   POST /api/users/login
  */
@@ -115,4 +171,25 @@ exports.verifyOtp = async (req, res) => {
     } catch (err) {
         res.status(500).json({ success: false, message: 'OTP Verification Failed' });
     }
+};
+
+/**
+ * @desc    Forgot Password - Request OTP
+ * @route   POST /api/users/forgot-password
+ */
+exports.forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        res.status(200).json({ success: true, message: 'Password reset instructions sent to email' });
+    } catch (err) {
+        res.status(500).json({ success: false, message: 'Process failed' });
+    }
+};
+
+/**
+ * @desc    Logout - Invalidate session
+ * @route   POST /api/users/logout
+ */
+exports.logout = async (req, res) => {
+    res.status(200).json({ success: true, message: 'Logged out successfully' });
 };

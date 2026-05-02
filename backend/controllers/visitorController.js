@@ -8,6 +8,41 @@ const { sendEntryAlert } = require('../utils/smsService');
 
 const { isDBConnected, mockStore } = require('../utils/mockData');
 
+/**
+ * @desc    Get all visitors
+ * @route   GET /api/visitors
+ */
+exports.getVisitors = async (req, res) => {
+    try {
+        if (isDBConnected()) {
+            const visitors = await Visitor.find().sort({ createdAt: -1 });
+            return res.status(200).json({ success: true, count: visitors.length, data: visitors });
+        }
+        res.status(200).json({ success: true, count: mockStore.visitors.length, data: mockStore.visitors, isMock: true });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Server Error' });
+    }
+};
+
+/**
+ * @desc    Get single visitor
+ * @route   GET /api/visitors/:id
+ */
+exports.getVisitorById = async (req, res) => {
+    try {
+        if (isDBConnected()) {
+            const visitor = await Visitor.findById(req.params.id);
+            if (!visitor) return res.status(404).json({ success: false, message: 'Visitor not found' });
+            return res.status(200).json({ success: true, data: visitor });
+        }
+        const visitor = mockStore.visitors.find(v => v._id === req.params.id);
+        if (!visitor) return res.status(404).json({ success: false, message: 'Mock Visitor not found' });
+        res.status(200).json({ success: true, data: visitor, isMock: true });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Server Error' });
+    }
+};
+
 exports.createVisitor = async (req, res) => {
   try {
     const { name, phone, vehicle, flatNumber, isPriority } = req.body;
