@@ -8,20 +8,42 @@ import {
 } from 'lucide-react';
 import ParkingMap from '../components/ParkingMap';
 
-const myVisitors = [
-  { id: 1, name: 'Rahul Sharma', phone: '9876543210', vehicle: 'MH 02 AB 1234', date: '2026-04-26', time: '10:30 AM', status: 'inside', duration: '45 min' },
-  { id: 2, name: 'Priya Patel', phone: '9876543211', vehicle: 'MH 04 CD 5678', date: '2026-04-26', time: '09:15 AM', status: 'exited', duration: '1h 20m' },
-  { id: 3, name: 'Amit Kumar', phone: '9876543212', vehicle: 'MH 01 EF 9012', date: '2026-04-25', time: '02:45 PM', status: 'exited', duration: '55 min' },
-  { id: 4, name: 'Neha Singh', phone: '9876543213', vehicle: 'MH 03 GH 3456', date: '2026-04-25', time: '11:00 AM', status: 'exited', duration: '2h 10m' },
-];
+import API_URL from '../apiConfig';
+import DashboardSkeleton from '../components/DashboardSkeleton';
 
 const UserDashboard = () => {
   const { user } = useAuth();
+  const [visitors, setVisitors] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [showInviteModal, setShowInviteModal] = useState(false);
 
-  const activeVisitors = myVisitors.filter(v => v.status === 'inside');
+  useEffect(() => {
+    const fetchMyVisitors = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem('parksmart_token');
+        // Logic: Resident sees visitors for their flat
+        const flat = user?.flat || 'A-401'; // Default for demo
+        const res = await fetch(`${API_URL}/api/v1/visitors/flat/${flat}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const result = await res.json();
+        setVisitors(result.data || []);
+      } catch (err) {
+        console.error('Failed to load resident data:', err);
+      } finally {
+        setTimeout(() => setLoading(false), 800);
+      }
+    };
+
+    if (user) fetchMyVisitors();
+  }, [user]);
+
+  if (loading) return <DashboardSkeleton />;
+
+  const activeVisitors = visitors.filter(v => v.status === 'inside');
 
   return (
     <div className="space-y-8 pb-12">
@@ -56,9 +78,9 @@ const UserDashboard = () => {
 
       {/* Stats Cluster */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <StatsCard icon={Users} label="GLOBAL VISITS" value={myVisitors.length} />
+        <StatsCard icon={Users} label="GLOBAL VISITS" value={visitors.length} />
         <StatsCard icon={ShieldCheck} label="ACTIVE NOW" value={activeVisitors.length} highlight />
-        <StatsCard icon={Activity} label="MONTHLY LOAD" value={myVisitors.length + 8} />
+        <StatsCard icon={Activity} label="MONTHLY LOAD" value={visitors.length + 8} />
       </div>
 
       {/* Primary Dashboard Grid */}
@@ -86,7 +108,8 @@ const UserDashboard = () => {
            </div>
 
            <div className="divide-y divide-[var(--border)]">
-              {myVisitors.map(v => (
+                             {visitors.map(v => (
+
                 <div key={v.id} className="p-6 flex items-center justify-between hover:bg-[var(--bg)] transition-all group">
                    <div className="flex items-center gap-6">
                       <div className={`h-12 w-12 rounded-2xl flex items-center justify-center border transition-all ${v.status === 'inside' ? 'bg-success/10 border-success/30 text-success' : 'bg-[var(--surface)] border-[var(--border)] text-[var(--txt-secondary)]'}`}>
