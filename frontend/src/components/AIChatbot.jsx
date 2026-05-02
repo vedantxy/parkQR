@@ -49,7 +49,7 @@ const AIChatbot = () => {
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_URL}/api/ai/ask`, {
+      const res = await fetch(`${API_URL}/ai/ask`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: trimmed }),

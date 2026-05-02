@@ -16,7 +16,7 @@ const AnalyticsDashboard = () => {
         const fetchData = async () => {
             if (!user?.token) return;
             try {
-                const res = await fetch(`${API_URL}/api/analytics`, {
+                const res = await fetch(`${API_URL}/analytics`, {
                     headers: { 'Authorization': `Bearer ${user.token}` }
                 });
                 const json = await res.json();

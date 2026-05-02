@@ -60,7 +60,7 @@ const VisitorEntry = () => {
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_URL}/api/visitors/`, {
+      const res = await fetch(`${API_URL}/visitors/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

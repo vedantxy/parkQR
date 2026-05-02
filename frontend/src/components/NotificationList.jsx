@@ -10,7 +10,7 @@ const NotificationList = () => {
     const fetchNotifications = async () => {
         if (!user?.token || user.role !== 'admin') return;
         try {
-            const response = await fetch(`${API_URL}/api/notifications`, {
+            const response = await fetch(`${API_URL}/notifications`, {
                 headers: { 'Authorization': `Bearer ${user.token}` }
             });
             const data = await response.json();
@@ -27,7 +27,7 @@ const NotificationList = () => {
     const markAsRead = async (id) => {
         if (!user?.token) return;
         try {
-            const response = await fetch(`${API_URL}/api/notifications/${id}`, {
+            const response = await fetch(`${API_URL}/notifications/${id}`, {
                 method: 'PUT',
                 headers: { 'Authorization': `Bearer ${user.token}` }
             });

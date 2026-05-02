@@ -11,7 +11,7 @@ const NotificationBell = ({ onClick }) => {
     const fetchUnread = async () => {
         if (!user?.token || user.role !== 'admin') return;
         try {
-            const res = await fetch(`${API_URL}/api/notifications`, {
+            const res = await fetch(`${API_URL}/notifications`, {
                 headers: { 'Authorization': `Bearer ${user.token}` }
             });
             const data = await res.json();

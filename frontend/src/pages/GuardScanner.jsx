@@ -52,7 +52,7 @@ const GuardScanner = () => {
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_URL}/api/visitors/scan-qr`, {
+      const res = await fetch(`${API_URL}/visitors/scan-qr`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
