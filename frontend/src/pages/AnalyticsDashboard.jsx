@@ -79,8 +79,8 @@ const AnalyticsDashboard = () => {
 
       {/* KPI Engine */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {kpis.map((kpi, i) => (
-          <div key={i} className="bg-[var(--surface)] rounded-[32px] border border-[var(--border)] p-8 shadow-2xl relative overflow-hidden group hover:border-[var(--accent)]/30 transition-all">
+        {kpis.map((kpi) => (
+          <div key={kpi.label} className="bg-[var(--surface)] rounded-[32px] border border-[var(--border)] p-8 shadow-2xl relative overflow-hidden group hover:border-[var(--accent)]/30 transition-all">
              <div className="absolute top-0 left-0 w-full h-1 opacity-20" style={{ backgroundColor: kpi.color }} />
              <div className="flex justify-between items-start mb-6">
                 <div className="h-12 w-12 bg-[var(--bg)] rounded-2xl flex items-center justify-center border border-[var(--border)]">
@@ -153,8 +153,8 @@ const AnalyticsDashboard = () => {
                     paddingAngle={8}
                     dataKey="value"
                   >
-                    {gateData.map((entry, i) => (
-                      <Cell key={i} fill={entry.color} stroke="none" />
+                    {gateData.map((entry) => (
+                      <Cell key={entry.name} fill={entry.color} stroke="none" />
                     ))}
                   </Pie>
                   <Tooltip />
@@ -162,8 +162,8 @@ const AnalyticsDashboard = () => {
               </ResponsiveContainer>
 
               <div className="space-y-4 min-w-[140px]">
-                 {gateData.map((g, i) => (
-                   <div key={i} className="flex items-center gap-3">
+                 {gateData.map((g) => (
+                   <div key={g.name} className="flex items-center gap-3">
                       <div className="h-2 w-2 rounded-full" style={{ backgroundColor: g.color }} />
                       <span className="text-[9px] font-black text-[var(--txt-secondary)] uppercase tracking-widest">{g.name}</span>
                       <span className="text-xs font-black ml-auto">{g.value}%</span>

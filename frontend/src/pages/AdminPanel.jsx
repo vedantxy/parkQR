@@ -11,6 +11,7 @@ import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, 
   CartesianGrid, Tooltip, Cell, LineChart, Line 
 } from 'recharts';
+import toast from 'react-hot-toast';
 import API_URL from '../apiConfig';
 
 const AdminPanel = () => {
@@ -50,10 +51,10 @@ const AdminPanel = () => {
         const data = await res.json();
         if (data.success && mounted) {
           const s = [
-            { label: 'Active Visitors', value: data.data.summary.totalInside, growth: '+12%', isUp: true },
-            { label: 'Today Arrivals', value: data.data.summary.totalToday, growth: '+3%', isUp: true },
-            { label: 'Available Slots', value: data.data.occupancy.available, growth: '-2%', isUp: false },
-            { label: 'Revenue (Est)', value: `₹${data.data.revenue.today}`, growth: '+8%', isUp: true },
+            { label: 'Active Visitors', value: data.data?.summary?.totalInside || 0, growth: '+12%', isUp: true },
+            { label: 'Today Arrivals', value: data.data?.summary?.totalToday || 0, growth: '+3%', isUp: true },
+            { label: 'Available Slots', value: data.data?.occupancy?.available || 0, growth: '-2%', isUp: false },
+            { label: 'Revenue (Est)', value: `₹${data.data?.revenue?.today || 0}`, growth: '+8%', isUp: true },
           ];
           setStats(s);
         }
