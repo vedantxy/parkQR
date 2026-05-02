@@ -12,59 +12,44 @@ const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
  * Body: { question: string }
  */
 const askAssistant = async (req, res) => {
-  try {
-    const { question } = req.body;
-
-    if (!question || !question.trim()) {
-      return res.status(400).json({ success: false, error: 'Question is required' });
-    }
-
-    // --- FALLBACK IF NO API KEY ---
-    if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY.includes('YOUR_KEY')) {
-        return res.json({ 
-            success: true, 
-            reply: `[MOCK AI MODE] Hello! I'm ParkSmart AI. I see ${await Visitor.countDocuments({status: 'inside'})} visitors inside. (Set your GEMINI_API_KEY in .env for real AI chat).`,
-            isMock: true 
-        });
-    }
-
-    // Gather real-time stats for context
     let stats = { totalInside: 0, totalExited: 0, totalComing: 0, overstayed: 0, totalSlots: 0, occupiedSlots: 0 };
-
+    
     try {
-      stats.totalInside = await Visitor.countDocuments({ status: 'inside' });
-      stats.totalExited = await Visitor.countDocuments({ status: 'exited' });
-      stats.totalComing = await Visitor.countDocuments({ status: 'coming' });
-      stats.totalSlots = await ParkingSlot.countDocuments();
-      stats.occupiedSlots = await ParkingSlot.countDocuments({ isOccupied: true });
-    } catch (dbErr) {
-      // Mock mode — use placeholder data
-      console.warn('⚠️ AI: DB unavailable, using mock stats');
-      stats = { totalInside: 12, totalExited: 45, totalComing: 3, overstayed: 2, totalSlots: 50, occupiedSlots: 22 };
-    }
+        const { question } = req.body;
 
-    const systemPrompt = `You are ParkSmart AI — an intelligent assistant for a Smart Parking & Visitor Management System.
+        if (!question || !question.trim()) {
+            return res.status(400).json({ success: false, error: 'Question is required' });
+        }
 
-CURRENT LIVE STATS:
-- Visitors currently inside: ${stats.totalInside}
-- Visitors who have exited today: ${stats.totalExited}
-- Visitors expected (coming): ${stats.totalComing}
-- Total parking slots: ${stats.totalSlots}
-- Occupied slots: ${stats.occupiedSlots}
-- Available slots: ${stats.totalSlots - stats.occupiedSlots}
+        // 1. Gather stats first
+        try {
+            stats.totalInside = await Visitor.countDocuments({ status: 'inside' });
+            stats.totalExited = await Visitor.countDocuments({ status: 'exited' });
+            stats.totalComing = await Visitor.countDocuments({ status: 'coming' });
+            stats.totalSlots = await ParkingSlot.countDocuments();
+            stats.occupiedSlots = await ParkingSlot.countDocuments({ isOccupied: true });
+        } catch (dbErr) {
+            stats = { totalInside: 12, totalExited: 45, totalComing: 3, overstayed: 2, totalSlots: 50, occupiedSlots: 22 };
+        }
 
-RULES:
-- Be helpful, concise, and professional.
-- If asked about parking data, use the stats above.
-- You can suggest actions like "add a visitor", "check overstay alerts", etc.
-- Keep responses under 200 words unless asked for detail.
-- Use simple language. You may respond in Hindi or English based on the user's language.`;
+        // 2. Fallback if API Key is missing
+        if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY.includes('YOUR_KEY')) {
+            return res.json({ 
+                success: true, 
+                reply: `[MOCK AI] I see ${stats.totalInside} visitors inside and ${stats.totalSlots - stats.occupiedSlots} slots free. (Set GEMINI_API_KEY for real chat).`,
+                isMock: true 
+            });
+        }
 
-    const result = await model.generateContent([systemPrompt, question]);
-    const response = await result.response;
-    const reply = response.text();
+        const systemPrompt = `You are ParkSmart AI assistant.
+LIVE STATS: Inside: ${stats.totalInside}, Exited: ${stats.totalExited}, Slots: ${stats.totalSlots - stats.occupiedSlots} free.
+Respond concisely in the user's language.`;
 
-    res.json({ success: true, reply });
+        const result = await model.generateContent([systemPrompt, question]);
+        const response = await result.response;
+        const reply = response.text();
+
+        res.json({ success: true, reply });
 
   } catch (error) {
     console.error('🤖 AI Error (Falling back to Mock):', error.message);
