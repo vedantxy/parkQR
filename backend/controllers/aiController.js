@@ -67,11 +67,13 @@ RULES:
     res.json({ success: true, reply });
 
   } catch (error) {
-    console.error('🤖 AI Error:', error);
-    res.status(500).json({ 
-        success: false, 
-        error: 'AI Error: ' + error.message,
-        details: error.toString()
+    console.error('🤖 AI Error (Falling back to Mock):', error.message);
+    
+    // Auto-Mock Fallback if network/API fails
+    return res.json({ 
+        success: true, 
+        reply: `[OFFLINE MODE] Hello! I'm ParkSmart AI. Currently, there are ${stats.totalInside} visitors inside and ${stats.totalSlots - stats.occupiedSlots} slots available. (Note: Real-time AI chat is offline due to: ${error.message})`,
+        isMock: true 
     });
   }
 };
