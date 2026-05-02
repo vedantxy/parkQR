@@ -12,7 +12,7 @@
   <a href="https://www.figma.com/file/your-link"><strong>🎨 Figma Design</strong></a> ·
   <a href="https://parksmart-pro.vercel.app"><strong>🌐 Live Frontend</strong></a> ·
   <a href="https://parksmart-api.render.com"><strong>⚙️ Backend API</strong></a> ·
-  <a href="https://documenter.getpostman.com/view/your-link"><strong>📄 Postman Docs</strong></a> ·
+  <a href="https://documenter.getpostman.com/view/50839131/2sBXqKofA7"><strong>📄 Postman Docs</strong></a> ·
   <a href="https://youtube.com/demo-link"><strong>📺 YouTube Demo</strong></a>
 </p>
 
