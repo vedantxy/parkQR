@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Users, Search, Filter, Plus, 
-  ExternalLink, Clock, Car, ShieldCheck, 
+  ExternalLink, Clock, Car, ShieldCheck, MapPin,
   ShieldAlert, MoreHorizontal, Download, ChevronRight, X
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
