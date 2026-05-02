@@ -2,60 +2,34 @@ import React from 'react';
 
 const DashboardSkeleton = () => {
   return (
-    <div className="flex h-screen bg-[#F8FAFC] font-inter">
-      {/* Sidebar Skeleton (Icon-only) */}
-      <div className="w-20 border-r border-slate-200 bg-white flex flex-col items-center py-8 gap-8">
-        <div className="h-10 w-10 shimmer rounded-xl" />
-        <div className="space-y-6">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="h-12 w-12 shimmer rounded-2xl" />
-          ))}
+    <div className="space-y-8 animate-pulse">
+      {/* Header Skeleton */}
+      <div className="flex justify-between items-end">
+        <div className="space-y-3">
+          <div className="h-10 w-64 bg-slate-200 dark:bg-slate-800 rounded-lg"></div>
+          <div className="h-3 w-40 bg-slate-100 dark:bg-slate-900 rounded-md"></div>
         </div>
+        <div className="h-12 w-40 bg-slate-200 dark:bg-slate-800 rounded-full"></div>
+      </div>
+
+      {/* KPI Stats Skeleton */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-32 bg-slate-200 dark:bg-slate-800 rounded-[32px] border border-slate-100 dark:border-slate-700"></div>
+        ))}
       </div>
 
       {/* Main Content Skeleton */}
-      <div className="flex-1 flex flex-col">
-        {/* Header Skeleton */}
-        <header className="h-20 border-b border-slate-200 bg-white flex items-center justify-between px-8">
-          <div className="flex items-center gap-12">
-            <div className="h-6 w-32 shimmer rounded" />
-            <div className="h-11 w-80 shimmer rounded-2xl hidden xl:block" />
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="h-11 w-11 shimmer rounded-2xl" />
-            <div className="h-11 w-11 shimmer rounded-2xl" />
-            <div className="h-10 w-32 shimmer rounded-xl" />
-            <div className="h-11 w-32 shimmer rounded-2xl" />
-          </div>
-        </header>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 h-[400px] bg-slate-200 dark:bg-slate-800 rounded-[32px]"></div>
+        <div className="h-[400px] bg-slate-200 dark:bg-slate-800 rounded-[32px]"></div>
+      </div>
 
-        {/* Dashboard Body Skeleton */}
-        <main className="p-8 space-y-8 overflow-y-auto">
-          {/* Info Tags */}
-          <div className="grid grid-cols-5 gap-4">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="h-16 shimmer rounded-lg" />
-            ))}
-          </div>
-
-          <div className="grid grid-cols-12 gap-8">
-            {/* Left Column */}
-            <div className="col-span-8 space-y-8">
-              <div className="grid grid-cols-3 gap-6">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-40 shimmer rounded-2xl border border-slate-100" />
-                ))}
-              </div>
-              <div className="h-96 shimmer rounded-2xl border border-slate-100" />
-            </div>
-
-            {/* Right Column */}
-            <div className="col-span-4 space-y-8">
-              <div className="h-80 shimmer rounded-2xl border border-slate-100" />
-              <div className="h-64 shimmer rounded-2xl border border-slate-100" />
-            </div>
-          </div>
-        </main>
+      {/* Bottom Grid Skeleton */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <div key={i} className="h-40 bg-slate-200 dark:bg-slate-800 rounded-[24px]"></div>
+        ))}
       </div>
     </div>
   );

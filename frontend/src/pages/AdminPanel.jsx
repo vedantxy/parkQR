@@ -12,34 +12,60 @@ import {
   CartesianGrid, Tooltip, Cell, LineChart, Line 
 } from 'recharts';
 
+import API_URL from '../apiConfig';
+import DashboardSkeleton from '../components/DashboardSkeleton';
+
 const AdminPanel = () => {
   const { theme } = useTheme();
   const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [dashboardData, setDashboardData] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState('A3');
   const [activeZone, setActiveZone] = useState('Zone A');
 
-  // Mock Data
-  const stats = [
-    { label: 'Active Users', value: '2,840', growth: '+12.5%', isUp: true },
-    { label: 'Bookings Today', value: '482', growth: '+3.1%', isUp: true },
-    { label: 'Available Spaces', value: '156', growth: '-2.4%', isUp: false },
-  ];
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem('parksmart_token');
+        
+        // --- PARALLEL FETCHING (Production Optimization) ---
+        const [analyticsRes, slotsRes] = await Promise.all([
+          fetch(`${API_URL}/api/v1/analytics/dashboard`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          }),
+          fetch(`${API_URL}/api/v1/parking/slots`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          })
+        ]);
 
-  const parkingSlots = [
-    { id: 'A1', status: 'occupied', carColor: '#3B82F6' },
-    { id: 'A2', status: 'occupied', carColor: '#EF4444' },
-    { id: 'A3', status: 'selected', carColor: '#F59E0B' },
-    { id: 'A4', status: 'available' },
-    { id: 'A5', status: 'occupied', carColor: '#10B981' },
-    { id: 'A6', status: 'available' },
-    { id: 'A7', status: 'occupied', carColor: '#6366F1' },
-    { id: 'A8', status: 'available' },
-  ];
+        const analytics = await analyticsRes.json();
+        const slots = await slotsRes.json();
 
-  const chartData = [
-    { name: 'Jan', value: 400 }, { name: 'Feb', value: 300 },
-    { name: 'Mar', value: 600 }, { name: 'Apr', value: 800 },
-    { name: 'May', value: 500 }, { name: 'Jun', value: 900 },
+        setDashboardData({
+          stats: analytics.data,
+          parkingSlots: slots.data || []
+        });
+      } catch (err) {
+        console.error('Failed to load dashboard:', err);
+      } finally {
+        // Minimum loading time for smooth transition
+        setTimeout(() => setLoading(false), 800);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  if (loading) return <DashboardSkeleton />;
+
+  const { stats: data, parkingSlots } = dashboardData || {};
+
+  // Map backend stats to UI display format
+  const displayStats = [
+    { label: 'Total Occupancy', value: `${data?.occupancy?.prediction || 0}%`, growth: data?.kpis?.revenue?.growth || '+0%', isUp: true },
+    { label: 'Bookings Today', value: data?.kpis?.totalVisitorsToday || '0', growth: '+3.1%', isUp: true },
+    { label: 'Available Spaces', value: data?.occupancy?.free || '0', growth: '-2.4%', isUp: false },
   ];
 
   return (
@@ -61,7 +87,7 @@ const AdminPanel = () => {
           
           {/* B. Stats Row */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {stats.map((stat, i) => (
+            {displayStats.map((stat, i) => (
               <motion.div 
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
@@ -138,10 +164,10 @@ const AdminPanel = () => {
                 <p className="text-4xl font-black text-[var(--txt-primary)] tracking-tighter">87.4%</p>
               </div>
               <ResponsiveContainer width="100%" height={100}>
-                <BarChart data={chartData}>
-                  <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                    {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={index === 5 ? 'var(--accent)' : 'var(--border)'} />
+                <BarChart data={data?.dailyStats || []}>
+                  <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                    {(data?.dailyStats || []).map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={index === (data?.dailyStats?.length - 1) ? 'var(--accent)' : 'var(--border)'} />
                     ))}
                   </Bar>
                 </BarChart>
@@ -179,12 +205,12 @@ const AdminPanel = () => {
                   cx="96" cy="96" r="80" 
                   className="stroke-[var(--accent)] fill-none stroke-[12] accent-glow" 
                   strokeDasharray="502" 
-                  strokeDashoffset="60"
+                  strokeDashoffset={502 - (502 * (data?.occupancy?.prediction || 0)) / 100}
                   strokeLinecap="round" 
                 />
               </svg>
               <div className="absolute text-center">
-                <p className="text-4xl font-black text-[var(--txt-primary)] tracking-tighter">87%</p>
+                <p className="text-4xl font-black text-[var(--txt-primary)] tracking-tighter">{data?.occupancy?.prediction || 0}%</p>
                 <p className="text-[10px] font-black text-[var(--txt-secondary)] uppercase tracking-[0.2em] mt-1">Fullness</p>
               </div>
             </div>
@@ -260,7 +286,7 @@ const OverviewItem = ({ icon: Icon, label, sub, type }) => (
   </div>
 );
 
-const ParkingSlot = ({ id, status, carColor, isSelected, onClick }) => {
+const ParkingSlot = React.memo(({ id, status, carColor, isSelected, onClick }) => {
   return (
     <motion.div 
       whileHover={{ scale: 1.02 }}
