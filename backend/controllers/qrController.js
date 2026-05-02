@@ -1,6 +1,7 @@
 const QRPass = require('../models/QRPass');
 const Visitor = require('../models/Visitor');
 const QRService = require('../utils/qrService');
+const { isDBConnected } = require('../utils/mockData');
 
 /**
  * @desc    Generate a QR Code for a visitor and save to DB
@@ -12,22 +13,23 @@ const generateVisitorQR = async (req, res) => {
     const { visitorId } = req.params;
 
     // 1. Check if visitor exists
-    const visitor = await Visitor.findById(visitorId);
-    if (!visitor) {
-      return res.status(404).json({ success: false, message: 'Visitor not found' });
+    if (isDBConnected()) {
+        const visitor = await Visitor.findById(visitorId);
+        if (!visitor) return res.status(404).json({ success: false, message: 'Visitor not found in DB' });
+
+        const { qrCode, expiresAt, token } = await QRService.generateAndStoreQR(visitor, 1440);
+        return res.status(201).json({ success: true, message: 'QR Generated', qrPass: { qrCode, expiresAt, token } });
     }
 
-    // 2. Generate and Store using Service (Centralized Logic)
-    const { qrCode, expiresAt, token } = await QRService.generateAndStoreQR(visitor, 1440); // 24 hours
-
+    // --- MOCK MODE FALLBACK ---
     res.status(201).json({
-      success: true,
-      message: 'QR Pass generated successfully',
-      qrPass: {
-        qrCode,
-        expiresAt,
-        token // Just in case frontend needs it
-      }
+        success: true,
+        message: 'QR Pass generated (MOCK)',
+        qrPass: {
+            qrCode: 'data:image/png;base64,mock-qr-data',
+            expiresAt: new Date(Date.now() + 86400000),
+            token: 'mock-token-' + visitorId
+        }
     });
 
   } catch (err) {
