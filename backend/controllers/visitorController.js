@@ -143,17 +143,27 @@ exports.scanQR = async (req, res) => {
 
     // --- DB MODE ---
     if (isDBConnected()) {
+        console.log(`🔍 Scanning DB for Token: ${qrData}`);
         const qrPass = await QRPass.findOne({ token: qrData }).populate('visitorId');
-        if (!qrPass) return res.status(404).json({ success: false, message: 'INVALID QR' });
+        
+        if (!qrPass) {
+            console.log('❌ Invalid QR Token');
+            return res.status(404).json({ success: false, message: 'INVALID QR: Token not found' });
+        }
         
         const visitor = qrPass.visitorId;
-        if (!visitor) return res.status(404).json({ message: 'VISITOR ERROR' });
+        if (!visitor) {
+            console.log('❌ Visitor not linked to token');
+            return res.status(404).json({ success: false, message: 'VISITOR ERROR: Link broken' });
+        }
 
         if (qrPass.isUsed) {
+            console.log('❌ QR already used');
             return res.status(409).json({ success: false, message: 'QR ALREADY USED & CLOSED' });
         }
 
         if (new Date() > qrPass.expiresAt) {
+            console.log('❌ QR expired');
             return res.status(403).json({ success: false, message: 'QR EXPIRED' });
         }
 
