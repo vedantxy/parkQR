@@ -263,7 +263,7 @@ VITE_API_URL=http://localhost:5000/api/v1
 
 | 🗺️ Interactive Parking Map | 📊 Real-Time Admin Dashboard |
 | :---: | :---: |
-| ![Map](screenshots/parking_map.png) | ![Dashboard](screenshots/dashboard_slots.png) |
+| ![Map](https://res.cloudinary.com/dv7bazp5k/image/upload/v1777736094/Screenshot_2026-05-02_204333_xylt6l.png) | ![Dashboard](https://res.cloudinary.com/dv7bazp5k/image/upload/v1777735934/Screenshot_2026-05-02_204311_mdjrhj.png) |
 
 ---
 
