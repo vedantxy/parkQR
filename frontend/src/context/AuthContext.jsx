@@ -48,33 +48,33 @@ export const AuthProvider = ({ children }) => {
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        // 2. Early Loading Clear: If we have cached data for this user, show it instantly
+        // 1. INSTANT NAVIGATION: Use cached user data if available to clear loader immediately
         const cachedUserStr = localStorage.getItem('parksmart_user');
         if (cachedUserStr) {
           try {
             const cachedUser = JSON.parse(cachedUserStr);
             if (cachedUser.uid === firebaseUser.uid) {
               setUser(cachedUser);
-              setInitialLoading(false);
+              setInitialLoading(false); // STOP LOADING NOW
               clearTimeout(timeoutId);
             }
-          } catch (e) { /* ignore parse error */ }
+          } catch (e) {}
         }
 
+        // 2. BACKGROUND SYNC: Update profile without blocking UI
         try {
-          // 2. Wrap Firestore call in a timeout promise to prevent hangs
           const docRef = doc(db, "users", firebaseUser.uid);
-          
           const profilePromise = getDoc(docRef);
+          
+          // Shorter timeout for background sync, but doesn't block UI anymore
           const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('timeout')), 5000)
+            setTimeout(() => reject(new Error('timeout')), 2000)
           );
 
           let docSnap;
           try {
             docSnap = await Promise.race([profilePromise, timeoutPromise]);
           } catch (e) {
-            console.warn("User profile fetch timed out. Using fallback.");
             docSnap = { exists: () => false };
           }
 
@@ -89,22 +89,9 @@ export const AuthProvider = ({ children }) => {
           localStorage.setItem('parksmart_user', JSON.stringify(userData));
           setUser(userData);
         } catch (err) {
-          // Graceful handling for offline or network issues
-          if (err.code === 'unavailable' || !navigator.onLine) {
-            const fallbackData = {
-              uid: firebaseUser.uid,
-              email: firebaseUser.email,
-              role: firebaseUser.email.includes('admin') ? 'admin' : 'guard',
-              name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
-              isOffline: true
-            };
-            setUser(fallbackData);
-          } else {
-            console.error("Auth sync error:", err);
-          }
+          // Fallback handled silently
         }
       } else {
-        // Only clear if we don't have a custom backend token
         if (!localStorage.getItem('parksmart_token')) {
           clearSession();
         }
