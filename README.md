@@ -1,222 +1,373 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/vedantxy/parkQR/main/frontend/public/vite.svg" width="100" alt="ParkSmart Pro Logo" />
-</p>
+# 🅿️ ParkSmart AI — Enterprise-Grade Smart Parking & Visitor Management
 
-<h1 align="center">🏎️ ParkSmart Pro</h1>
+ParkSmart AI is a production-ready, SaaS-level platform for residential societies, corporate campuses, and smart cities. It combines **real-time WebSocket automation**, **Firebase authentication**, **AI-powered parking allocation**, and **advanced analytics** into a single, premium dashboard experience.
 
-<p align="center">
-  <strong>The Future of Autonomous Parking & Enterprise Visitor Management</strong>
-</p>
-
-<p align="center">
-  <a href="https://www.figma.com/file/your-link"><strong>🎨 Figma Design</strong></a> ·
-  <a href="https://parksmart-pro.vercel.app"><strong>🌐 Live Frontend</strong></a> ·
-  <a href="https://parksmart-api.render.com"><strong>⚙️ Backend API</strong></a> ·
-  <a href="https://documenter.getpostman.com/view/50839131/2sBXqKofA7"><strong>📄 Postman Docs</strong></a> ·
-  <a href="https://youtube.com/demo-link"><strong>📺 YouTube Demo</strong></a>
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/MERN-Stack-AD0000?style=for-the-badge&logo=mongodb" alt="MERN" />
-  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
-  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind" />
-  <img src="https://img.shields.io/badge/Socket.io-010101?style=for-the-badge&logo=socket.io&logoColor=white" alt="Socket.io" />
-  <img src="https://img.shields.io/badge/Google_Gemini-8E75B2?style=for-the-badge&logo=google-gemini&logoColor=white" alt="AI" />
-</p>
+![Status](https://img.shields.io/badge/Status-Production--Ready-success)
+![Stack](https://img.shields.io/badge/Stack-React%20+%20Express%20+%20MongoDB%20+%20Firebase-blue)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Theme](https://img.shields.io/badge/Theme-Premium%20Light%20UI-white)
 
 ---
 
-## 📖 About Project
+## 🖼️ Visual Showcase
 
-**ParkSmart Pro** is a next-generation, enterprise-grade SaaS platform designed to revolutionize how residential societies and corporate hubs manage their parking ecosystems and visitor flows. By integrating **Neural AI verification**, **Real-time Spatial Tracking**, and **Automated QR Gateways**, we eliminate manual logging and security bottlenecks.
-
----
-
-## ⚠️ Problem Statement
-
-Traditional parking management suffers from:
-*   **Security Gaps**: Manual visitor logs are easily forged and difficult to audit.
-*   **Space Inefficiency**: Real-time occupancy data is rarely available, leading to wasted slots.
-*   **Communication Lag**: Residents are often unaware when a guest arrives at the gate.
-*   **Overstay Issues**: Vehicles exceeding their stay duration go unnoticed, causing congestion.
+| 🗺️ Interactive Parking Map | 📊 Real-Time Admin Dashboard |
+| :---: | :---: |
+| ![Parking Map](screenshots/parking_map.png) | ![Admin Dashboard](screenshots/dashboard_slots.png) |
 
 ---
 
-## ✅ The Solution
+## 🌟 Key Features
 
-ParkSmart Pro provides a unified digital nervous system:
-*   **Digital Passports**: Instant QR-based entry/exit passes.
-*   **Live Digital Twin**: A real-time spatial map of every parking slot.
-*   **Instant Sync**: Residents get real-time notifications via WebSockets.
-*   **AI Analytics**: Predictive load balancing and overstay detection.
+### 🔐 Authentication & Role-Based Access
+- **Firebase Auth** — Secure email/password login with persistent sessions.
+- **Role System** — `admin` and `guard` roles with filtered navigation & access controls.
+- **JWT Tokens** — Backend-issued JWTs for API route protection via `authMiddleware`.
 
----
+### 📡 Real-Time Security Engine
+- **Socket.IO** — Live WebSocket connections for instant entry/exit alerts.
+- **Overstay Detection** — Background cron (30 s interval) monitors visitors exceeding time limits.
+- **Dynamic Toasts** — React Hot Toast notifications for instant feedback.
 
-## 🚀 Core Features
+### 📊 Intelligent Analytics Center
+- **Data Aggregation** — MongoDB aggregation pipelines for daily visitor trends.
+- **4 Chart Types** — AreaChart, PieChart, BarChart, RadialBarChart via Recharts.
+- **CSV Export** — Download analytics data on demand.
 
-| Feature | Description | Status |
-| :--- | :--- | :--- |
-| **QR Authentication** | Encrypted QR codes for seamless visitor entry/exit. | ✅ Live |
-| **Interactive Map** | Real-time SVG-based spatial monitoring of all slots. | ✅ Live |
-| **Multi-Role Auth** | Distinct dashboards for Admins, Guards, and Residents. | ✅ Live |
-| **Analytics Engine** | Comprehensive data visualization for traffic and revenue. | ✅ Live |
-| **AI Assistant** | Gemini-powered chatbot for facility management queries. | ✅ Live |
+### 🛂 Smart Visitor Entry (QR-Based)
+- **Instant Pass Generation** — QR-based entry tokens via `qrcode` library.
+- **Unified Scan Flow** — Single `/scan-qr` endpoint handles both entry and exit.
+- **Expiry & Reuse Prevention** — Strict validation on QR expiry and scan-state transitions.
+- **Countdown Timer** — Live remaining-time display on generated passes.
 
----
+### 🏗️ Fail-Safe Architecture
+- **Intelligent Mock Mode** — Auto-switches to in-memory data store if MongoDB is offline.
+- **Clean MVC Structure** — Controllers → Routes → Models separation for scalability.
 
-## 🧠 Advanced AI & Real-time Features
-
-### 🤖 Neural AI (Gemini Integration)
-Our AI engine doesn't just chat; it analyzes. 
-*   **Predictive Occupancy**: Forecasts peak traffic hours based on historical data.
-*   **Automated Audits**: Scans visitor logs to flag suspicious recurring entries.
-*   **Facility NLP**: Allows admins to query "Which slot has the highest overstay rate?" in plain English.
-
-### ⚡ Real-time Digital Twin (Socket.io)
-*   **Instant Gate Sync**: When a guard scans a pass, the resident's dashboard updates in **<100ms**.
-*   **Live Slot Status**: Visual indicators on the map change color the moment a vehicle enters a slot.
-
----
-
-## 🛠 Tech Stack
-
-### Frontend
-*   **Framework**: React 18 (Vite)
-*   **Styling**: Vanilla CSS + Tailwind CSS (Glassmorphism UI)
-*   **Animation**: Framer Motion
-*   **State Management**: React Context API
-
-### Backend
-*   **Runtime**: Node.js
-*   **API**: Express.js (RESTful)
-*   **Real-time**: Socket.io
-*   **Auth**: JWT + Firebase Auth (OTP Support)
-
-### Database & Cloud
-*   **Primary DB**: MongoDB Atlas (Aggregations & Time-series)
-*   **Secondary DB**: Firebase Firestore (Real-time Sync)
-*   **Deployment**: Vercel (Frontend), Render (Backend)
+### 🎨 Premium Light Theme UI
+- **Design System** — Clean white cards, subtle shadows, soft borders (#E2E8F0).
+- **Color Palette** — Primary Blue (#2563EB), Success Green (#10B981), Danger Red (#EF4444), Warning Amber (#F59E0B).
+- **Typography** — Inter font (Google Fonts), 300–900 weights.
+- **Collapsible Sidebar** — 240px expanded / 64px collapsed with blue active-border indicators.
+- **Framer Motion** — Page transitions, modal animations, toast notifications.
+- **Responsive** — Works on desktop and mobile.
 
 ---
 
-## 🏗 System Architecture
+## 🗺️ System Architecture
 
 ```mermaid
 graph TD
-    A[User/Resident] -->|React Frontend| B(API Gateway)
-    G[Guard Scanner] -->|QR Scan| B
-    B --> C{Authentication}
-    C -->|JWT| D[Node.js Backend]
-    D --> E[(MongoDB)]
-    D --> F[Socket.io Hub]
-    F -->|Real-time Alert| A
-    D --> H[Gemini AI Engine]
+    %% Roles
+    Resident((🏠 Resident))
+    Guard((🛡️ Guard))
+    Admin((👑 Admin))
+    Visitor((🚗 Visitor))
+
+    %% Frontend Interfaces
+    subgraph Frontend [React Frontend - Vite]
+        Login[Login Page / OTP]
+        DashResident[Resident Dashboard]
+        DashAdmin[Admin Analytics]
+        Scanner[Guard Scanner App]
+        Booking[Parking Map UI]
+        Chatbot[🤖 AI Chatbot]
+    end
+
+    %% Backend Services
+    subgraph Backend [Node.js + Express Server]
+        API_Gateway[API Routes]
+        SocketIO[Socket.io Server]
+        CronJob[⏳ Background Cron Job]
+        
+        subgraph Controllers
+            AuthCtrl[Auth Controller]
+            VisitorCtrl[Visitor Controller]
+            QRCtrl[QR Controller]
+            AICtrl[AI Controller]
+        end
+    end
+
+    %% External APIs
+    subgraph ExternalServices [Third-Party APIs]
+        Twilio[📱 Twilio SMS API]
+        Anthropic[🧠 Anthropic Claude AI]
+        GMap[🗺️ Google Maps API]
+    end
+
+    %% Database
+    subgraph Database [MongoDB]
+        UsersDB[(Users)]
+        VisitorsDB[(Visitors)]
+        SlotsDB[(Parking Slots)]
+    end
+
+    %% Workflows
+    Resident -->|Request OTP| Login
+    Login --> AuthCtrl
+    AuthCtrl -->|Trigger SMS| Twilio
+    Twilio -->|Delivers OTP| Resident
+
+    Resident -->|Creates Pass| DashResident
+    DashResident --> VisitorCtrl
+    VisitorCtrl --> QRCtrl
+    QRCtrl -->|Generates QR Link| Visitor
+
+    Visitor -->|Shows QR/Number Plate at Gate| Guard
+    Guard --> Scanner
+    Scanner -->|Scans QR / ALPR| VisitorCtrl
+    VisitorCtrl -->|Assigns Slot| SlotsDB
+    VisitorCtrl -->|Triggers Entry SMS| Twilio
+
+    Scanner -->|Emits Live Event| SocketIO
+    SocketIO -->|Live Update| Booking
+    SocketIO -->|Live Update| DashAdmin
+
+    Booking -->|Renders Live Slots| GMap
+
+    CronJob -->|Checks DB| SlotsDB
+    CronJob -->|If Time Exceeds| Twilio
+    Twilio -->|Overstay Alert SMS| Resident
+
+    Admin -->|Asks Question| Chatbot
+    Chatbot --> AICtrl
+    AICtrl -->|Analyzes Data| Anthropic
+    Anthropic -->|Returns Insight| Chatbot
 ```
 
 ---
 
-## 📁 Folder Structure
+## 🛠️ Tech Stack
 
-```bash
+| Layer | Technology |
+|---|---|
+| **Frontend** | React 18, Vite 5, Tailwind CSS 3, Framer Motion, Recharts, Lucide Icons |
+| **Backend** | Node.js, Express 5, Socket.IO 4, Morgan |
+| **Database** | MongoDB (Mongoose 9) — with built-in mock fallback |
+| **Auth** | Firebase Auth (client) + Firebase Admin SDK (server) + JWT |
+| **QR Engine** | `qrcode` (generation) + `html5-qrcode` (camera scanning) |
+| **Realtime** | Socket.IO (bi-directional WebSockets) |
+| **AI/ML** | Anthropic Claude API (`@anthropic-ai/sdk`) — Chatbot, Risk Analysis, Summaries |
+| **Notifications** | React Hot Toast |
+
+---
+
+## 🖥️ Pages (8 Total)
+
+| # | Page | Component | Description |
+|---|---|---|---|
+| 1 | **Login** | `LoginPage` | Centered card, dot-pattern background, role quick-access buttons |
+| 2 | **Dashboard** | `AdminPanel` | 4 stat cards, visitor trend chart, peak hours chart, recent table |
+| 3 | **Visitor Entry** | `VisitorEntry` | Split form/QR layout, duration selector, VIP toggle, countdown |
+| 4 | **Guard Scanner** | `GuardScanner` | Camera view, animated scan line, manual input fallback, recent scans |
+| 5 | **Parking Map** | `BookingPage` | Filter bar, 4-column slot grid, overstay pulse, detail drawer |
+| 6 | **Analytics** | `AnalyticsDashboard` | Date range picker, 4 KPIs, Area/Pie/Bar/Radial charts, CSV export |
+| 7 | **Notifications** | `NotificationsPage` | Filter tabs, color-coded cards, mark read, delete, empty state |
+| 8 | **Residents** | `UserDashboard` | Welcome card, active visitors, history table with search/pagination |
+
+**Floating Component:**
+| — | **AI Chatbot** | `AIChatbot` | Floating chat bubble, Claude-powered assistant, quick suggestions |
+
+---
+
+## 📂 Project Structure
+
+```text
 parkQR/
 ├── backend/
-│   ├── controllers/    # Business Logic
-│   ├── models/         # Mongoose Schemas
-│   ├── routes/         # API Endpoints
-│   └── utils/          # Middleware & AI Helpers
+│   ├── config/
+│   │   ├── db.js                  # MongoDB connection with mock-mode fallback
+│   │   └── firebaseAdmin.js       # Firebase Admin SDK initialization
+│   ├── controllers/
+│   │   ├── analyticsController.js # Aggregation pipelines for KPI data
+│   │   ├── notificationController.js # Overstay checks & alert engine
+│   │   ├── parkingController.js   # Slot CRUD & availability logic
+│   │   ├── qrController.js        # QR generation & scan verification
+│   │   ├── userController.js      # User registration & login
+│   │   └── visitorController.js   # Visitor lifecycle (create → entry → exit)
+│   ├── middleware/
+│   │   └── authMiddleware.js      # JWT + Firebase token verification
+│   ├── models/
+│   │   ├── Notification.js        # Alert schema
+│   │   ├── ParkingSlot.js         # Slot schema (type, status, floor)
+│   │   ├── QRPass.js              # QR pass schema (token, expiry)
+│   │   ├── User.js                # User schema (name, email, role)
+│   │   └── Visitor.js             # Visitor schema (status lifecycle)
+│   ├── routes/
+│   │   ├── analyticsRoutes.js     # GET /api/analytics/*
+│   │   ├── notificationRoutes.js  # GET/POST /api/notifications/*
+│   │   ├── parkingRoutes.js       # GET/POST /api/parking/*
+│   │   ├── qrRoutes.js           # POST /api/qr/*
+│   │   ├── userRoutes.js          # POST /api/users/*
+│   │   └── visitorRoutes.js       # GET/POST /api/visitors/*
+│   ├── scripts/
+│   │   ├── seedFirestore.js       # Seed Firestore with initial data
+│   │   └── seedParkingSlots.js    # Seed MongoDB parking slots
+│   ├── utils/
+│   │   ├── firebaseSync.js        # Firebase ↔ MongoDB sync helpers
+│   │   ├── generateToken.js       # JWT token generation utility
+│   │   ├── mockData.js            # In-memory data store (mock mode)
+│   │   └── qrService.js           # QR code generation logic
+│   ├── seedParking.js             # Quick-seed script for parking slots
+│   ├── server.js                  # Express + Socket.IO HTTP server entry point
+│   ├── package.json
+│   └── .env                       # PORT, MONGODB_URI, JWT_SECRET, NODE_ENV
+│
 ├── frontend/
 │   ├── src/
-│   │   ├── components/ # Reusable UI
-│   │   ├── context/    # Global State
-│   │   ├── pages/      # View Layers
-│   │   └── services/   # API Call Logic
-└── README.md
+│   │   ├── components/
+│   │   │   ├── AppLayout.jsx           # Sidebar + header layout wrapper
+│   │   │   ├── AnalyticsDashboard.jsx  # (legacy) Charts component
+│   │   │   ├── NotificationBell.jsx    # Header notification icon
+│   │   │   ├── NotificationList.jsx    # Alert feed panel
+│   │   │   ├── ParkingGrid.jsx         # Visual parking slot grid
+│   │   │   ├── QRModal.jsx             # QR code display modal
+│   │   │   └── VisitorForm.jsx         # Visitor registration form
+│   │   ├── context/
+│   │   │   └── AuthContext.jsx         # Firebase Auth provider + role state
+│   │   ├── pages/
+│   │   │   ├── AdminPanel.jsx          # Dashboard with stats, charts, table
+│   │   │   ├── AnalyticsDashboard.jsx  # Full analytics page (4 charts)
+│   │   │   ├── BookingPage.jsx         # Parking slot grid with filter/drawer
+│   │   │   ├── Dashboard.jsx           # General dashboard view
+│   │   │   ├── GuardScanner.jsx        # QR camera scanner terminal
+│   │   │   ├── LoginPage.jsx           # Firebase login page (light theme)
+│   │   │   ├── NotificationsPage.jsx   # Notification center
+│   │   │   ├── ParkingHome.jsx         # Parking landing page
+│   │   │   ├── SpotListing.jsx         # Available spots list
+│   │   │   ├── UserDashboard.jsx       # Resident dashboard
+│   │   │   └── VisitorEntry.jsx        # Visitor registration + QR generation
+│   │   ├── services/
+│   │   │   ├── bookingService.js       # Firestore booking CRUD
+│   │   │   └── parkingService.js       # Firestore parking listener
+│   │   ├── utils/
+│   │   │   ├── seedSlots.js            # Client-side slot seeding
+│   │   │   └── socket.js              # Socket.IO client instance
+│   │   ├── App.jsx                     # Root app — routing + toast provider
+│   │   ├── firebase.js                 # Firebase client SDK config
+│   │   ├── index.css                   # Global styles + Inter font
+│   │   └── main.jsx                    # React DOM entry point
+│   ├── .env                            # VITE_FIREBASE_* config keys
+│   ├── tailwind.config.js              # Design system tokens
+│   ├── postcss.config.js
+│   └── package.json
+│
+├── docs/                               # Project documentation
+└── README.md                           # ← You are here
 ```
 
 ---
 
-## 🔌 API Documentation
+## 🚀 Getting Started
 
-### Visitor Pass Generation
-`POST /api/v1/visitors`
-```json
-{
-  "name": "John Doe",
-  "vehicleNumber": "MH-12-AB-1234",
-  "purpose": "Maintenance",
-  "duration": 60
-}
-```
+### 1. Prerequisites
+- **Node.js** v16+
+- **MongoDB** (optional — system auto-switches to Mock Mode if unavailable)
 
-### QR Verification
-`POST /api/v1/visitors/scan-qr`
-```json
-{
-  "qrData": "TOKEN_STRING",
-  "gateId": "GATE_01"
-}
-```
+### 2. Installation
 
----
-
-## 🔐 Security Features
-
-*   **JWT Encryption**: State-of-the-art token-based session management.
-*   **Rate Limiting**: Protection against DDoS and Brute Force on OTP endpoints.
-*   **CORS Protection**: Restricted API access to authorized domains only.
-*   **XSS Mitigation**: Sanitized inputs and content security policies.
-
----
-
-## ⚡ Performance Optimization
-
-*   **Code Splitting**: Lazy loading of dashboard modules to reduce initial TTI.
-*   **Asset Compression**: WebP imagery and minified CSS/JS bundles.
-*   **Database Indexing**: Optimized MongoDB queries for <50ms response times on analytics.
-*   **Memoization**: Use of `useMemo` and `useCallback` to prevent redundant React re-renders.
-
----
-
-## 📸 Screenshot Gallery
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/vedantxy/parkQR/main/screenshots/dashboard.png" width="45%" alt="Dashboard" />
-  <img src="https://raw.githubusercontent.com/vedantxy/parkQR/main/screenshots/map.png" width="45%" alt="Parking Map" />
-</p>
-
----
-
-## 🏁 Installation & Setup
-
-### 1. Clone Repository
 ```bash
-git clone https://github.com/vedantxy/parkQR.git
+# Clone the repository
+git clone <repo-url>
 cd parkQR
-```
 
-### 2. Backend Setup
-```bash
+# Install Backend Dependencies
 cd backend
 npm install
-# Configure .env with MONGO_URI, JWT_SECRET, GEMINI_API_KEY
+
+# Install Frontend Dependencies
+cd ../frontend
+npm install
+```
+
+### 3. Environment Variables
+
+**Backend** (`backend/.env`):
+```env
+PORT=5000
+MONGODB_URI=mongodb://127.0.0.1:27017/smart_parking
+JWT_SECRET=your_jwt_secret_here
+NODE_ENV=development
+```
+
+**Frontend** (`frontend/.env`):
+```env
+VITE_FIREBASE_API_KEY=your_key
+VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_project.firebasestorage.app
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
+VITE_GOOGLE_MAPS_KEY=your_google_maps_api_key
+```
+
+### 4. Running the System
+
+```bash
+# Terminal 1 — Start Backend (Port 5000)
+cd backend
+node server.js
+
+# Terminal 2 — Start Frontend (Port 5173)
+cd frontend
 npm run dev
 ```
 
-### 3. Frontend Setup
+### 5. Seed Data (Optional)
+
 ```bash
-cd frontend
-npm install
-npm run dev
+# Populate parking slots in MongoDB
+node backend/seedParking.js
+
+# Seed Firestore data
+node backend/scripts/seedFirestore.js
+
+# Seed parking slots via script
+node backend/scripts/seedParkingSlots.js
 ```
+
+---
+
+## 🔌 API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/users/register` | Register a new user |
+| `POST` | `/api/users/login` | Authenticate & get JWT |
+| `GET` | `/api/parking/slots` | List all parking slots |
+| `POST` | `/api/parking/book` | Book a parking slot |
+| `POST` | `/api/visitors/add` | Register a new visitor |
+| `GET` | `/api/visitors/list` | Get all visitors |
+| `POST` | `/api/qr/scan-qr` | Unified QR scan (entry/exit) |
+| `POST` | `/api/qr/generate` | Generate a QR pass |
+| `GET` | `/api/analytics/dashboard` | Get analytics KPIs |
+| `GET` | `/api/notifications` | Fetch notifications |
+| `POST` | `/api/notifications/read` | Mark notifications as read |
+| `POST` | `/api/ai/ask` | Chat with AI Assistant |
+| `GET` | `/api/ai/analyze/:visitorId` | AI Risk Analysis |
+| `GET` | `/api/ai/summary` | AI Daily Summary |
+
+---
+
+## 🎨 Design System
+
+| Token | Value |
+|-------|-------|
+| Primary | `#2563EB` (Blue) |
+| Success | `#10B981` (Green) |
+| Danger | `#EF4444` (Red) |
+| Warning | `#F59E0B` (Amber) |
+| Background | `#F8FAFC` |
+| Card | `#FFFFFF` |
+| Text Primary | `#0F172A` |
+| Text Secondary | `#64748B` |
+| Border | `#E2E8F0` |
+| Font | Inter (Google Fonts) |
+| Card Radius | 12px |
+| Button Radius | 8px |
 
 ---
 
 ## 📜 License
 
-Distributed under the **MIT License**. See `LICENSE` for more information.
-
----
-
-<p align="center">
-  Made with ❤️ by <a href="https://github.com/vedantxy">Vedant</a>
-</p>
+This project is licensed under the **MIT License**.
