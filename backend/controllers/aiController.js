@@ -4,7 +4,7 @@ const ParkingSlot = require('../models/ParkingSlot');
 
 // Initialize Gemini client
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 /**
  * 🤖 Smart Parking Assistant — Chat endpoint
@@ -60,27 +60,19 @@ RULES:
 - Keep responses under 200 words unless asked for detail.
 - Use simple language. You may respond in Hindi or English based on the user's language.`;
 
-    const chat = model.startChat({
-      history: [
-        { role: "user", parts: [{ text: "System Context: " + systemPrompt }] },
-        { role: "model", parts: [{ text: "Understood. I am ParkSmart AI, ready to assist." }] },
-      ],
-    });
-
-    const result = await chat.sendMessage(question);
+    const result = await model.generateContent([systemPrompt, question]);
     const response = await result.response;
     const reply = response.text();
 
     res.json({ success: true, reply });
 
   } catch (error) {
-    console.error('🤖 AI Error:', error.message);
-
-    if (error.message.includes('API_KEY_INVALID')) {
-      return res.status(500).json({ success: false, error: 'Invalid Gemini API key. Check GEMINI_API_KEY in .env' });
-    }
-
-    res.status(500).json({ success: false, error: 'AI service temporarily unavailable' });
+    console.error('🤖 AI Error:', error);
+    res.status(500).json({ 
+        success: false, 
+        error: 'AI Error: ' + error.message,
+        details: error.toString()
+    });
   }
 };
 
