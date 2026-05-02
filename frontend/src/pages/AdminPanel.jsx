@@ -21,6 +21,24 @@ const AdminPanel = () => {
   const [stats, setStats] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const parkingSlots = [
+    { id: 'A01', status: 'occupied', carColor: '#3B82F6' },
+    { id: 'A02', status: 'occupied', carColor: '#EF4444' },
+    { id: 'A03', status: 'available' },
+    { id: 'A04', status: 'available' },
+    { id: 'A05', status: 'occupied', carColor: '#10B981' },
+    { id: 'A06', status: 'available' },
+    { id: 'A07', status: 'occupied', carColor: '#6366F1' },
+    { id: 'A08', status: 'available' },
+  ];
+
+  const chartData = [
+    { name: 'Mon', value: 400 }, { name: 'Tue', value: 300 },
+    { name: 'Wed', value: 600 }, { name: 'Thu', value: 800 },
+    { name: 'Fri', value: 500 }, { name: 'Sat', value: 900 },
+    { name: 'Sun', value: 700 },
+  ];
+
   useEffect(() => {
     const fetchDashboard = async () => {
       if (!user?.token) return;

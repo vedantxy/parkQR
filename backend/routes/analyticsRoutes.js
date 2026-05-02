@@ -5,9 +5,9 @@ const { getDashboardStats } = require('../controllers/analyticsController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
 // @route   GET /api/analytics
-router.get('/', protect, authorize('admin'), getDashboardStats);
+router.get('/', protect, getDashboardStats);
 
 // @route   GET /api/analytics/dashboard
-router.get('/dashboard', protect, authorize('admin'), getDashboardStats);
+router.get('/dashboard', protect, getDashboardStats);
 
 module.exports = router;
