@@ -34,6 +34,7 @@ mockSlots.forEach(slot => {
 });
 
 const BookingPage = () => {
+  const { user } = useAuth();
   const [slots, setSlots] = useState(mockSlots);
   const [filter, setFilter] = useState('all');
   const [selectedSlot, setSelectedSlot] = useState(null);
