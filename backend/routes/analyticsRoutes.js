@@ -7,4 +7,7 @@ const { protect, authorize } = require('../middleware/authMiddleware');
 // @route   GET /api/analytics
 router.get('/', protect, authorize('admin'), getDashboardStats);
 
+// @route   GET /api/analytics/dashboard
+router.get('/dashboard', protect, authorize('admin'), getDashboardStats);
+
 module.exports = router;
