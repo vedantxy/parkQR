@@ -19,6 +19,15 @@ const askAssistant = async (req, res) => {
       return res.status(400).json({ success: false, error: 'Question is required' });
     }
 
+    // --- FALLBACK IF NO API KEY ---
+    if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY.includes('YOUR_KEY')) {
+        return res.json({ 
+            success: true, 
+            reply: `[MOCK AI MODE] Hello! I'm ParkSmart AI. I see ${await Visitor.countDocuments({status: 'inside'})} visitors inside. (Set your GEMINI_API_KEY in .env for real AI chat).`,
+            isMock: true 
+        });
+    }
+
     // Gather real-time stats for context
     let stats = { totalInside: 0, totalExited: 0, totalComing: 0, overstayed: 0, totalSlots: 0, occupiedSlots: 0 };
 
