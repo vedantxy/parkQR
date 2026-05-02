@@ -5,6 +5,8 @@ import {
   ParkingSquare, Car, Clock, AlertTriangle, Filter,
   X, User, Phone, Home, Timer, MapPin, ChevronRight, Activity, Layers, ShieldCheck
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import API_URL from '../apiConfig';
 import ParkingMap from '../components/ParkingMap';
 
 const mockSlots = Array.from({ length: 32 }, (_, i) => ({
@@ -37,15 +39,27 @@ const BookingPage = () => {
   const [selectedSlot, setSelectedSlot] = useState(null);
 
   useEffect(() => {
+    const fetchSlots = async () => {
+      try {
+        const res = await fetch(`${API_URL}/parking/slots`, {
+          headers: { 'Authorization': `Bearer ${user?.token}` }
+        });
+        const data = await res.json();
+        if (data.success) setSlots(data.data);
+      } catch (e) {
+        console.warn('Using mock/cache parking data');
+      }
+    };
+
+    fetchSlots();
+
     try {
       const unsub = listenToAvailableSlots((firebaseSlots) => {
         if (firebaseSlots.length > 0) setSlots(firebaseSlots);
       });
       return () => unsub && unsub();
-    } catch (e) {
-      console.warn('Using mock parking data');
-    }
-  }, []);
+    } catch (e) {}
+  }, [user?.token]);
 
   const filteredSlots = slots.filter(slot => {
     if (filter === 'available') return !slot.isOccupied;

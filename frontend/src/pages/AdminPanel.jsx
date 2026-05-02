@@ -11,36 +11,43 @@ import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, 
   CartesianGrid, Tooltip, Cell, LineChart, Line 
 } from 'recharts';
+import API_URL from '../apiConfig';
 
 const AdminPanel = () => {
   const { theme } = useTheme();
   const { user } = useAuth();
-  const [selectedSlot, setSelectedSlot] = useState('A3');
+  const [selectedSlot, setSelectedSlot] = useState('A01');
   const [activeZone, setActiveZone] = useState('Zone A');
+  const [stats, setStats] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock Data
-  const stats = [
-    { label: 'Active Users', value: '2,840', growth: '+12.5%', isUp: true },
-    { label: 'Bookings Today', value: '482', growth: '+3.1%', isUp: true },
-    { label: 'Available Spaces', value: '156', growth: '-2.4%', isUp: false },
-  ];
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      if (!user?.token) return;
+      try {
+        const res = await fetch(`${API_URL}/analytics/dashboard`, {
+          headers: { 'Authorization': `Bearer ${user.token}` }
+        });
+        const data = await res.json();
+        if (data.success) {
+          const s = [
+            { label: 'Active Visitors', value: data.data.summary.totalInside, growth: '+12%', isUp: true },
+            { label: 'Today Arrivals', value: data.data.summary.totalToday, growth: '+3%', isUp: true },
+            { label: 'Available Slots', value: data.data.occupancy.available, growth: '-2%', isUp: false },
+            { label: 'Revenue (Est)', value: `₹${data.data.revenue.today}`, growth: '+8%', isUp: true },
+          ];
+          setStats(s);
+        }
+      } catch (e) {
+        console.error("Dashboard fetch failed");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDashboard();
+  }, [user?.token]);
 
-  const parkingSlots = [
-    { id: 'A1', status: 'occupied', carColor: '#3B82F6' },
-    { id: 'A2', status: 'occupied', carColor: '#EF4444' },
-    { id: 'A3', status: 'selected', carColor: '#F59E0B' },
-    { id: 'A4', status: 'available' },
-    { id: 'A5', status: 'occupied', carColor: '#10B981' },
-    { id: 'A6', status: 'available' },
-    { id: 'A7', status: 'occupied', carColor: '#6366F1' },
-    { id: 'A8', status: 'available' },
-  ];
-
-  const chartData = [
-    { name: 'Jan', value: 400 }, { name: 'Feb', value: 300 },
-    { name: 'Mar', value: 600 }, { name: 'Apr', value: 800 },
-    { name: 'May', value: 500 }, { name: 'Jun', value: 900 },
-  ];
+  if (loading) return <div className="p-20 text-center animate-pulse uppercase font-black tracking-widest opacity-40">Syncing Intelligence...</div>;
 
   return (
     <div className="space-y-8 pb-12">

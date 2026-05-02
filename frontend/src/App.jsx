@@ -7,7 +7,7 @@ import DashboardSkeleton from './components/DashboardSkeleton';
 import NeuralLoader from './components/NeuralLoader';
 
 // Lazy load pages for performance
-const LoginPage = lazy(() => import('./pages/LoginPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage')); // Auth Entry
 const AdminPanel = lazy(() => import('./pages/AdminPanel'));
 const BookingPage = lazy(() => import('./pages/BookingPage'));
 const VisitorManagement = lazy(() => import('./pages/VisitorManagement'));
