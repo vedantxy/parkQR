@@ -15,7 +15,9 @@ exports.protect = async (req, res, next) => {
   let token;
 
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-    token = req.headers.authorization.split(' ')[1];
+    // split by space and filter out empty strings in case of multiple spaces
+    const parts = req.headers.authorization.split(' ').filter(Boolean);
+    token = parts[1];
   }
 
   if (!token) {
