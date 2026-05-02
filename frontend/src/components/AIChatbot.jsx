@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   MessageCircle, X, Send, Bot, User, Sparkles, Loader2, Minimize2, Maximize2
 } from 'lucide-react';
+import API_URL from '../apiConfig';
 
 const AIChatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -48,7 +49,7 @@ const AIChatbot = () => {
     setLoading(true);
 
     try {
-      const res = await fetch('http://localhost:5000/api/ai/ask', {
+      const res = await fetch(`${API_URL}/api/ai/ask`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: trimmed }),

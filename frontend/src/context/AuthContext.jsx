@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { auth, db } from '../firebase';
+import API_URL from '../apiConfig';
 import {
   signInWithEmailAndPassword,
   signOut,
@@ -132,7 +133,7 @@ export const AuthProvider = ({ children }) => {
   const requestOtp = async (phone) => {
     setAuthActionLoading(true);
     try {
-      const res = await fetch('http://localhost:5000/api/users/send-otp', {
+      const res = await fetch(`${API_URL}/api/users/send-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone })
@@ -149,7 +150,7 @@ export const AuthProvider = ({ children }) => {
   const loginWithOtp = async (phone, otp) => {
     setAuthActionLoading(true);
     try {
-      const res = await fetch('http://localhost:5000/api/users/verify-otp', {
+      const res = await fetch(`${API_URL}/api/users/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone, otp })

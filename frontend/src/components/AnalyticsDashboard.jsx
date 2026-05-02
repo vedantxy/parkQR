@@ -5,6 +5,7 @@ import {
 import { Zap, Download, Activity, Clock, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import API_URL from '../apiConfig';
 
 const AnalyticsDashboard = () => {
     const { user } = useAuth();
@@ -15,7 +16,7 @@ const AnalyticsDashboard = () => {
         const fetchData = async () => {
             if (!user?.token) return;
             try {
-                const res = await fetch('http://localhost:5000/api/analytics', {
+                const res = await fetch(`${API_URL}/api/analytics`, {
                     headers: { 'Authorization': `Bearer ${user.token}` }
                 });
                 const json = await res.json();

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import API_URL from '../apiConfig';
 
 const NotificationList = () => {
     const { user } = useAuth();
@@ -9,7 +10,7 @@ const NotificationList = () => {
     const fetchNotifications = async () => {
         if (!user?.token || user.role !== 'admin') return;
         try {
-            const response = await fetch('http://localhost:5000/api/notifications', {
+            const response = await fetch(`${API_URL}/api/notifications`, {
                 headers: { 'Authorization': `Bearer ${user.token}` }
             });
             const data = await response.json();
@@ -26,7 +27,7 @@ const NotificationList = () => {
     const markAsRead = async (id) => {
         if (!user?.token) return;
         try {
-            const response = await fetch(`http://localhost:5000/api/notifications/${id}`, {
+            const response = await fetch(`${API_URL}/api/notifications/${id}`, {
                 method: 'PUT',
                 headers: { 'Authorization': `Bearer ${user.token}` }
             });

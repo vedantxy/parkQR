@@ -8,6 +8,7 @@ import {
   ShieldAlert, Activity
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import API_URL from '../apiConfig';
 
 const GuardScanner = () => {
   const { user } = useAuth();
@@ -51,7 +52,7 @@ const GuardScanner = () => {
     setLoading(true);
 
     try {
-      const res = await fetch('http://localhost:5000/api/visitors/scan-qr', {
+      const res = await fetch(`${API_URL}/api/visitors/scan-qr`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

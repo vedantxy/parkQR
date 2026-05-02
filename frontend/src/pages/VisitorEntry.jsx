@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
+import API_URL from '../apiConfig';
 
 const VisitorEntry = () => {
   const { user } = useAuth();
@@ -59,7 +60,7 @@ const VisitorEntry = () => {
     setLoading(true);
 
     try {
-      const res = await fetch('http://localhost:5000/api/visitors/', {
+      const res = await fetch(`${API_URL}/api/visitors/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

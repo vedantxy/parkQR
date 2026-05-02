@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import socket from '../utils/socket';
 import { Bell } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import API_URL from '../apiConfig';
 
 const NotificationBell = ({ onClick }) => {
     const { user } = useAuth();
@@ -10,7 +11,7 @@ const NotificationBell = ({ onClick }) => {
     const fetchUnread = async () => {
         if (!user?.token || user.role !== 'admin') return;
         try {
-            const res = await fetch('http://localhost:5000/api/notifications', {
+            const res = await fetch(`${API_URL}/api/notifications`, {
                 headers: { 'Authorization': `Bearer ${user.token}` }
             });
             const data = await res.json();
