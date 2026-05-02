@@ -1,6 +1,3 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/vedantxy/parkQR/main/frontend/public/vite.svg" width="100" alt="ParkSmart Pro Logo" />
-</p>
 
 <h1 align="center">🏎️ ParkSmart Pro</h1>
 
@@ -9,7 +6,7 @@
 </p>
 
 <p align="center">
-  <a href="https://www.figma.com/file/your-link"><strong>🎨 Figma Design</strong></a> ·
+  <a href="https://www.figma.com/proto/KxdacndljNmlOhHl1HTTVM/Untitled?page-id=392%3A2&node-id=398-1773&p=f&viewport=604%2C289%2C0.1&t=HXsAZWVVL4Ppeoch-1&scaling=min-zoom&content-scaling=fixed&starting-point-node-id=398%3A1773"><strong>🎨 Figma Design</strong></a> ·
   <a href="https://parksmart-pro.vercel.app"><strong>🌐 Live Frontend</strong></a> ·
   <a href="https://parksmart-api.render.com"><strong>⚙️ Backend API</strong></a> ·
   <a href="https://documenter.getpostman.com/view/50839131/2sBXqKofA7"><strong>📄 Postman Docs</strong></a> ·
