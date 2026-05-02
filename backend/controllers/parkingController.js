@@ -81,8 +81,8 @@ const assignSmartSlot = async (req, res) => {
         bestSlot.startTime = new Date();
         await bestSlot.save();
 
-        // Sync to Firebase
-        await syncSlotToFirestore(bestSlot);
+        // Sync to Firebase (Background)
+        syncSlotToFirestore(bestSlot);
 
         return res.status(200).json({
             success: true,
@@ -114,7 +114,8 @@ const releaseSlot = async (req, res) => {
             slot.visitorId = null;
             await slot.save();
             
-            await syncSlotToFirestore(slot);
+            // Sync to Firebase (Background)
+            syncSlotToFirestore(slot);
             
             // Emit Socket event for real-time UI updates
             const io = req.app.get('socketio');
@@ -153,7 +154,8 @@ const updateSlotStatus = async (req, res) => {
             
             if (!slot) return res.status(404).json({ success: false, message: 'Slot not found' });
             
-            await syncSlotToFirestore(slot);
+            // Sync to Firebase (Background)
+            syncSlotToFirestore(slot);
             
             const io = req.app.get('socketio');
             if (io) io.emit('slot-update', slot);
