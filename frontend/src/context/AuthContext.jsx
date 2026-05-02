@@ -62,8 +62,21 @@ export const AuthProvider = ({ children }) => {
         }
 
         try {
+          // 2. Wrap Firestore call in a timeout promise to prevent hangs
           const docRef = doc(db, "users", firebaseUser.uid);
-          const docSnap = await getDoc(docRef);
+          
+          const profilePromise = getDoc(docRef);
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('timeout')), 2000)
+          );
+
+          let docSnap;
+          try {
+            docSnap = await Promise.race([profilePromise, timeoutPromise]);
+          } catch (e) {
+            console.warn("User profile fetch timed out. Using fallback.");
+            docSnap = { exists: () => false };
+          }
 
           const userData = {
             uid: firebaseUser.uid,
