@@ -86,12 +86,12 @@ const AdminPanel = () => {
           
           {/* B. Stats Row */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {stats.map((stat, i) => (
+            {stats.map((stat) => (
               <motion.div 
-                key={i}
+                key={stat.label}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
+                transition={{ delay: 0.1 }}
                 className="card-automotive p-6 flex flex-col justify-between h-40"
               >
                 <div className="flex justify-between items-start">
