@@ -17,58 +17,62 @@ import API_URL from '../apiConfig';
 const AdminPanel = () => {
   const { theme } = useTheme();
   const { user } = useAuth();
-  const [selectedSlot, setSelectedSlot] = useState('A01');
+  const [selectedSlot, setSelectedSlot] = useState(null);
   const [activeZone, setActiveZone] = useState('Zone A');
   const [stats, setStats] = useState([]);
+  const [chartData, setChartData] = useState([]);
+  const [parkingSlots, setParkingSlots] = useState([]);
+  const [timeline, setTimeline] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const parkingSlots = [
-    { id: 'A01', status: 'occupied', carColor: '#3B82F6' },
-    { id: 'A02', status: 'occupied', carColor: '#EF4444' },
-    { id: 'A03', status: 'available' },
-    { id: 'A04', status: 'available' },
-    { id: 'A05', status: 'occupied', carColor: '#10B981' },
-    { id: 'A06', status: 'available' },
-    { id: 'A07', status: 'occupied', carColor: '#6366F1' },
-    { id: 'A08', status: 'available' },
-  ];
-
-  const chartData = [
-    { name: 'Mon', value: 400 }, { name: 'Tue', value: 300 },
-    { name: 'Wed', value: 600 }, { name: 'Thu', value: 800 },
-    { name: 'Fri', value: 500 }, { name: 'Sat', value: 900 },
-    { name: 'Sun', value: 700 },
-  ];
 
   useEffect(() => {
     let mounted = true;
-    const fetchDashboard = async () => {
+    const loadDashboard = async () => {
       if (!user?.token) return;
       try {
+        // 1. Fetch Analytics Aggregation
         const res = await fetch(`${API_URL}/analytics/dashboard`, {
           headers: { 'Authorization': `Bearer ${user.token}` }
         });
         const data = await res.json();
-        if (data.success && mounted) {
+        
+        // 2. Fetch Real-time Slots
+        const slotsRes = await fetch(`${API_URL}/parking/slots`, {
+          headers: { 'Authorization': `Bearer ${user.token}` }
+        });
+        const slotsData = await slotsRes.json();
+
+        if (mounted && data.success) {
           const s = [
-            { label: 'Active Visitors', value: data.data?.summary?.totalInside || 0, growth: '+12%', isUp: true },
-            { label: 'Today Arrivals', value: data.data?.summary?.totalToday || 0, growth: '+3%', isUp: true },
-            { label: 'Available Slots', value: data.data?.occupancy?.available || 0, growth: '-2%', isUp: false },
-            { label: 'Revenue (Est)', value: `₹${data.data?.revenue?.today || 0}`, growth: '+8%', isUp: true },
+            { label: 'Active Visitors', value: data.data?.occupancy?.occupied || 0, growth: '+12%', isUp: true },
+            { label: 'Today Arrivals', value: data.data?.kpis?.totalVisitorsToday || 0, growth: '+3%', isUp: true },
+            { label: 'Available Slots', value: data.data?.occupancy?.free || 0, growth: '-2%', isUp: false },
+            { label: 'Revenue (Est)', value: `₹${data.data?.kpis?.revenue?.today || 0}`, growth: data.data?.kpis?.revenue?.growth || '+0%', isUp: true },
           ];
           setStats(s);
+          setChartData(data.data?.dailyStats?.map(d => ({ name: d._id, value: d.count })) || []);
+          setTimeline(data.data?.timeline || []);
+        }
+
+        if (mounted && slotsData.success) {
+          setParkingSlots(slotsData.data.slice(0, 8)); // Showing first 8 for dashboard preview
         }
       } catch (e) {
         if (mounted) {
-          console.error("Dashboard fetch failed:", e);
-          toast.error("Analytics sync interrupted");
+          console.error("Dashboard sync error:", e);
+          toast.error("Real-time sync interrupted");
         }
       } finally {
         if (mounted) setLoading(false);
       }
     };
-    fetchDashboard();
-    return () => { mounted = false; };
+    loadDashboard();
+    const interval = setInterval(loadDashboard, 30000); // Auto-refresh every 30s
+    return () => { 
+      mounted = false; 
+      clearInterval(interval);
+    };
   }, [user?.token]);
 
   if (loading) return <div className="p-20 text-center animate-pulse uppercase font-black tracking-widest opacity-40">Syncing Intelligence...</div>;
@@ -180,15 +184,23 @@ const AdminPanel = () => {
             </div>
 
             <div className="card-automotive p-8 flex flex-col justify-between h-64">
-               <div className="flex justify-between items-start">
-                <h3 className="text-[10px] font-black text-[var(--txt-secondary)] uppercase tracking-[0.2em]">Performance</h3>
-                <TrendingUp size={20} className="text-[var(--accent)]" />
-               </div>
-               <div className="space-y-4">
-                 <PerformanceRow label="Occupancy Rate" value="92%" />
-                 <PerformanceRow label="Avg. Revenue" value="$4,280" />
-                 <PerformanceRow label="Turnover" value="12.5x" />
-               </div>
+              <div className="flex justify-between items-start">
+                <h3 className="text-[10px] font-black text-[var(--txt-secondary)] uppercase tracking-[0.2em]">Recent Activity</h3>
+                <span className="text-[10px] font-black text-[var(--accent)] bg-[var(--accent)]/10 px-3 py-1 rounded-full border border-[var(--accent)]/20 animate-pulse">Live</span>
+              </div>
+              <div className="mt-4 flex-1 overflow-y-auto space-y-4 custom-scrollbar pr-2">
+                {timeline.length > 0 ? timeline.map((item, idx) => (
+                  <div key={idx} className="flex items-center gap-3 border-b border-[var(--border)] pb-3 last:border-0">
+                    <div className={`h-2 w-2 rounded-full ${item.type === 'ENTRY' ? 'bg-success' : item.type === 'EXIT' ? 'bg-primary' : 'bg-danger'}`} />
+                    <div className="flex-1">
+                      <p className="text-[11px] font-black text-[var(--txt-primary)] uppercase tracking-tight leading-tight">{item.message}</p>
+                      <p className="text-[9px] text-[var(--txt-secondary)] uppercase opacity-50">{new Date(item.createdAt).toLocaleTimeString()}</p>
+                    </div>
+                  </div>
+                )) : (
+                  <p className="text-[10px] text-[var(--txt-secondary)] uppercase text-center mt-12 italic opacity-40">Awaiting Neural Data...</p>
+                )}
+              </div>
             </div>
           </div>
         </div>
