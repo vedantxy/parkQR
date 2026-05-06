@@ -1,4 +1,4 @@
-****# <p align="center">🅿️ ParkSmart AI — Next-Gen Enterprise Parking SaaS</p>
+<p align="center">🅿️ ParkSmart AI — Next-Gen Enterprise Parking SaaS</p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Status-Production--Ready-success?style=for-the-badge&logo=rocket" alt="Status" />
@@ -10,12 +10,12 @@
 <p align="center">
   <b>The ultimate AI-powered, real-time spatial intelligence platform for modern societies and smart cities.</b>
 </p>
-
 <p align="center">
-  <a href="#-https://www.figma.com/proto/KxdacndljNmlOhHl1HTTVM/Untitled?page-id=392%3A2&node-id=398-1773&p=f&viewport=604%2C289%2C0.1&t=HXsAZWVVL4Ppeoch-1&scaling=min-zoom&content-scaling=fixed&starting-point-node-id=398%3A1773"><b>Figma</b></a> •
-  <a href="#-https://park-qr-six.vercel.app/"><b>Live App</b></a> •
-  <a href="#-api-docs"><b>API Docs</b></a> •
-  <a href="#-youtube-demo"><b>Video Demo</b></a> •
+  🔗 
+  <a href="https://www.figma.com/proto/KxdacndljNmlOhHl1HTTVM/Untitled"><b>Figma Design</b></a> |
+  <a href="https://park-qr-six.vercel.app/"><b>Live Demo</b></a> |
+  <a href="#api-docs"><b>API Docs</b></a> |
+  <a href="#youtube-demo"><b>Video Demo</b></a>
 </p>
 
 ---
