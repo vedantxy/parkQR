@@ -18,7 +18,7 @@
 </p>
 <p align="center">
   🔗 
-  <a href="https://www.figma.com/proto/KxdacndljNmlOhHl1HTTVM/Untitled"><b>Figma Design</b></a> |
+  <a href="https://www.figma.com/proto/KxdacndljNmlOhHl1HTTVM/Untitled?node-id=398-1773&p=f&viewport=265%2C345%2C0.08&t=YEOmYyrxbZU6Em3b-1&scaling=min-zoom&content-scaling=fixed&starting-point-node-id=398%3A1773&page-id=392%3A2"><b>Figma Design</b></a> |
   <a href="https://park-qr-six.vercel.app/"><b>Live Demo</b></a> |
   <a href="https://documenter.getpostman.com/view/50839131/2sBXqKofA7"><b>API Docs</b></a> |
   <a href="#youtube-demo"><b>Video Demo</b></a>
