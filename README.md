@@ -1,4 +1,10 @@
-<p align="center">🅿️ ParkSmart AI — Next-Gen Enterprise Parking SaaS</p>
+<div align="center">
+
+# 🅿️ ParkSmart AI
+
+### Smart AI-Powered Parking SaaS Platform
+
+</div>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Status-Production--Ready-success?style=for-the-badge&logo=rocket" alt="Status" />
@@ -14,7 +20,7 @@
   🔗 
   <a href="https://www.figma.com/proto/KxdacndljNmlOhHl1HTTVM/Untitled"><b>Figma Design</b></a> |
   <a href="https://park-qr-six.vercel.app/"><b>Live Demo</b></a> |
-  <a href="#api-docs"><b>API Docs</b></a> |
+  <a href="https://documenter.getpostman.com/view/50839131/2sBXqKofA7"><b>API Docs</b></a> |
   <a href="#youtube-demo"><b>Video Demo</b></a>
 </p>
 
